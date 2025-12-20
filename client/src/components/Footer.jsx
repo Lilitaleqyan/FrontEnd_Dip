@@ -8,7 +8,7 @@ export default function Footer() {
 
   const handleSubscribe = (e) => {
     e.preventDefault();
-    // Handle subscription logic here
+    // Արդյունավետ բաժանորդագրության լոգիկան այստեղ
     setEmail("");
   };
 
@@ -16,14 +16,14 @@ export default function Footer() {
     <footer className="bg-card border-t border-border py-12 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo & Socials */}
+        
           <div className="space-y-4">
             <div className="flex items-center">
               <BookOpen className="text-primary text-2xl mr-2" />
-              <span className="text-2xl font-bold text-foreground">Գրադարան</span>
+              <span className="text-2xl font-bold text-foreground">ԳրքաՊտույտ</span>
             </div>
             <p className="text-muted-foreground">
-              Современная цифровая библиотека для всех любителей чтения.
+              Ժամանակակից թվային գրադարան բոլոր ընթերցասերների համար։
             </p>
             <div className="flex space-x-4">
               <Button variant="ghost" size="sm">
@@ -38,35 +38,35 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Sections */}
+          {/* Բաժիններ */}
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Разделы</h3>
+            <h3 className="text-foreground font-semibold mb-4">Բաժիններ</h3>
             <ul className="space-y-2">
-              <li><a href="/" className="text-muted-foreground hover:text-primary transition-colors">Главная</a></li>
-              <li><a href="/books" className="text-muted-foreground hover:text-primary transition-colors">Каталог книг</a></li>
-              <li><a href="/audiobooks" className="text-muted-foreground hover:text-primary transition-colors">Аудиокниги</a></li>
+              <li><a href="/" className="text-muted-foreground hover:text-primary transition-colors">Գլխավոր</a></li>
+              <li><a href="/books" className="text-muted-foreground hover:text-primary transition-colors">Գրքերի կատալոգ</a></li>
+              <li><a href="/audiobooks" className="text-muted-foreground hover:text-primary transition-colors">Աուդիոգրքեր</a></li>
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Աջակցություն */}
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Поддержка</h3>
+            <h3 className="text-foreground font-semibold mb-4">Աջակցություն</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Помощь</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Контакты</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Правила</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Конфиденциальность</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Օգնություն</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Կապ</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Օգտագործման կանոններ</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Գաղտնիություն</a></li>
             </ul>
           </div>
 
-          {/* Subscription */}
+          {/* Բաժանորդագրություն */}
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Подписка</h3>
-            <p className="text-muted-foreground mb-4">Получайте уведомления о новых книгах</p>
+            <h3 className="text-foreground font-semibold mb-4">Բաժանորդագրություն</h3>
+            <p className="text-muted-foreground mb-4">Ստացեք ծանուցումներ նոր գրքերի մասին</p>
             <form onSubmit={handleSubscribe} className="flex">
               <Input
                 type="email"
-                placeholder="Ваш email"
+                placeholder="Ձեր էլ․ հասցեն"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="rounded-r-none"
@@ -78,9 +78,9 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Footer bottom */}
+        {/* Footer ստորին հատված */}
         <div className="border-t border-border mt-8 pt-8 text-center">
-          <p className="text-muted-foreground">&copy; 2024 БиблиоТека. Все права защищены.</p>
+          <p className="text-muted-foreground">&copy; 2024 ԳրքաՊտույտ Բոլոր իրավունքները պաշտպանված են։</p>
         </div>
       </div>
     </footer>

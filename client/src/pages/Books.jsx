@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { downloadBook } from "@/lib/storage";
 import { useLocation } from "wouter";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -7,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Grid, List, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Grid, List, Star, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { getBooks } from "@/lib/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
 export default function Books() {
   const [location] = useLocation();
@@ -66,17 +68,17 @@ export default function Books() {
     ));
 
   const categoryLabels = {
-    all: "Все категории",
-    fiction: "Художественная",
-    science: "Научная",
-    educational: "Учебная",
-    audiobook: "Аудиокниги"
+    all: "Բոլոր կատեգորիաները",
+    fiction: "Գեղարվեստական",
+    science: "Գիտական",
+    educational: "Ուսումնական",
+    audiobook: "Աուդիոգրքեր"
   };
 
   if (isLoading) return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center">
-        <p className="text-muted-foreground text-lg">Загрузка...</p>
+        <p className="text-muted-foreground text-lg">Բեռնում...</p>
       </div>
     </div>
   );
@@ -86,13 +88,13 @@ export default function Books() {
       <Card className="max-w-2xl mx-auto">
         <CardContent className="p-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-destructive mb-4">Произошло ошибка</h2>
-            <p className="text-muted-foreground mb-4">{error.message || "Не удалось загрузить книги"}</p>
+            <h2 className="text-2xl font-bold text-destructive mb-4">Տեղի ունեցավ սխալ</h2>
+            <p className="text-muted-foreground mb-4">{error.message || "Չհաջողվեց բեռնել գրքերը"}</p>
             <Button 
               onClick={() => window.location.reload()} 
               variant="outline"
             >
-              Перезагрузить страницу
+              Էջը թարմացնել
             </Button>
           </div>
         </CardContent>
@@ -106,9 +108,9 @@ export default function Books() {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">Каталог книг</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Գրքերի կատալոգ</h1>
           <p className="text-muted-foreground">
-            Найдите идеальную книгу из нашей коллекции ({filteredSortedBooks.length} результатов)
+            Գտեք ձեր սիրելի գիրքը մեր հավաքածուից ({filteredSortedBooks.length} արդյունք)
           </p>
         </div>
 
@@ -116,13 +118,13 @@ export default function Books() {
         <div className="flex gap-4">
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Сортировать по..." />
+              <SelectValue placeholder="Դասավորել ըստ..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="title">Названию</SelectItem>
-              <SelectItem value="author">Автору</SelectItem>
-              <SelectItem value="date">Дате добавления</SelectItem>
-              <SelectItem value="rating">Рейтингу</SelectItem>
+              <SelectItem value="title">Վերնագրով</SelectItem>
+              <SelectItem value="author">Հեղինակով</SelectItem>
+              <SelectItem value="date">Ավելացման ամսաթվով</SelectItem>
+              <SelectItem value="rating">Վարկանիշով</SelectItem>
             </SelectContent>
           </Select>
 
@@ -152,25 +154,25 @@ export default function Books() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <Label className="block text-sm font-medium mb-2">Поиск по названию</Label>
+              <Label className="block text-sm font-medium mb-2">Որոնում ըստ վերնագրի</Label>
               <Input
                 type="text"
-                placeholder="Введите название..."
+                placeholder="Մուտքագրեք վերնագիրը..."
                 value={filters.title}
                 onChange={(e) => setFilters({ ...filters, title: e.target.value })}
               />
             </div>
             <div>
-              <Label className="block text-sm font-medium mb-2">Автор</Label>
+              <Label className="block text-sm font-medium mb-2">Հեղինակ</Label>
               <Input
                 type="text"
-                placeholder="Имя автора..."
+                placeholder="Հեղինակի անունը..."
                 value={filters.author}
                 onChange={(e) => setFilters({ ...filters, author: e.target.value })}
               />
             </div>
             <div>
-              <Label className="block text-sm font-medium mb-2">Категория</Label>
+              <Label className="block text-sm font-medium mb-2">Կատեգորիա</Label>
               <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
                 <SelectTrigger>
                   <SelectValue />
@@ -184,7 +186,7 @@ export default function Books() {
             </div>
             <div className="flex items-end">
               <Button onClick={() => setCurrentPage(1)} className="w-full">
-                <Search className="w-4 h-4 mr-2" /> Найти
+                <Search className="w-4 h-4 mr-2" /> Գտնել
               </Button>
             </div>
           </div>
@@ -194,7 +196,9 @@ export default function Books() {
       {/* Books */}
       {currentBooks.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">Книги не найдены. Попробуйте изменить параметры поиска.</p>
+          <p className="text-muted-foreground text-lg">
+            Գրքեր չեն գտնվել։ Փորձեք փոխել որոնման պարամետրերը։
+          </p>
         </div>
       ) : (
         <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8" : "space-y-4 mb-8"}>
@@ -205,7 +209,7 @@ export default function Books() {
             >
               <img
                 src={book.coverUrl}
-                alt={`Обложка книги ${book.title}`}
+                alt={`Գրքի կազմը ${book.title}`}
                 className={viewMode === "grid" ? "w-full h-48 object-cover" : "w-20 h-28 object-cover rounded"}
               />
               <div className={viewMode === "grid" ? "p-4" : "flex-1"}>
@@ -223,14 +227,25 @@ export default function Books() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="flex mr-2">{renderStars(book.rating)}</div>
-                    <span className="text-xs text-muted-foreground">{book.rating.toFixed(1)}</span>
+                    <span className="text-xs text-muted-foreground">{book.rating ? book.rating : "0.0"}</span>
                   </div>
                   <Link href={`/book/${book.id}`}>
+                  
                     <Button variant="link" className="text-primary hover:text-primary/80 text-sm font-medium p-0">
-                      Подробнее
+                      Մանրամասն
                     </Button>
                   </Link>
                 </div>
+             <Button 
+                // asChild 
+                variant="outline" 
+                className="flex items-center gap-2" 
+                size="sm"
+                onClick={() => downloadBook(book.id)}
+              >
+                <Download className="w-5 h-5" /> Ներբեռնել
+              </Button>
+
               </div>
             </div>
           ))}

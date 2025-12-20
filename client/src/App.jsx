@@ -16,10 +16,13 @@ import Audiobooks from "./pages/Audiobooks";
 import Admin from "./pages/Admin";
 import NotFound from "@/pages/not-found";
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, adminOnly = false }) {
   const user = getCurrentUser();
   if (!user) {
     return <Redirect to="/login"/>;
+  }
+  if (adminOnly && user?.role?.toLowerCase() !== "admin") {
+    return <Redirect to="/"/>;
   }
   return <>{children}</>;
 }
@@ -57,7 +60,7 @@ function Router() {
         </ProtectedRoute>
       </Route>
       <Route path="/admin">
-        <ProtectedRoute>
+        <ProtectedRoute adminOnly={true}>
           <Navbar />
           <Admin />
           <Footer />

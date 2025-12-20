@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,11 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function Navbar() {
+  const [isAdminUser, setIsAdminUser] = useState(false)
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const currentUser = getCurrentUser();
+
 
   const handleLogout = () => {
     logout();
@@ -28,6 +30,16 @@ export default function Navbar() {
       setLocation(`/books?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
+
+useEffect(() => {
+  const checkAdmin = async () => {
+    const adminStatus = await isAdmin();
+    setIsAdminUser(adminStatus);
+  };
+  checkAdmin();
+}, []);
+
+
 
   const NavItems = () => (
     <>
@@ -49,7 +61,7 @@ export default function Navbar() {
       >
         Աուդիոգրքեր
       </Link>
-      {isAdmin() && (
+      {isAdminUser && (
         <Link
           href="/admin"
           className="text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium"
@@ -108,7 +120,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" />
-                    Выйти
+                    դուրս գալ
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

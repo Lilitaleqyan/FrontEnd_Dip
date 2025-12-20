@@ -1,33 +1,42 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
 import { getStoredBooks } from "@/lib/storage";
 import { Book, BookOpen, Headphones, Microscope, GraduationCap } from "lucide-react";
 
 export default function Home() {
-  const allBooks = getStoredBooks();
-  const featuredBooks = allBooks.slice(0, 4);
-  
+  const [allBooks, setAllBooks] = useState([]);
+  const [featuredBooks, setFeaturedBooks] = useState([]);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      const books = await getStoredBooks();
+      setAllBooks(books || []);
+      setFeaturedBooks((books || []).slice(0, 4));
+    };
+    fetchBooks();
+  }, []);
+
   const categories = [
     {
-      name: "Художественная",
+      name: "Գեղարվեստական",
       count: allBooks.filter(b => b.category === "fiction").length,
       icon: Book,
       category: "fiction"
     },
     {
-      name: "Научная", 
+      name: "Գիտական", 
       count: allBooks.filter(b => b.category === "science").length,
       icon: Microscope,
       category: "science"
     },
     {
-      name: "Учебная",
+      name: "Ուսուցողական",
       count: allBooks.filter(b => b.category === "educational").length,
       icon: GraduationCap,
       category: "educational"
     },
     {
-      name: "Аудиокниги",
+      name: "Աուդիոգրքեր",
       count: allBooks.filter(b => b.category === "audiobook").length,
       icon: Headphones,
       category: "audiobook"
@@ -39,10 +48,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className="text-center mb-12">
         <h1 className="text-5xl font-bold text-foreground mb-4">
-          Добро пожаловать в БиблиоТеку
+          Բարի գալուստ ԳրքաՊտույտ
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Откройте для себя мир знаний с нашей современной цифровой библиотекой
+          Բացահայտեք գիտելիքների աշխարհը մեր ժամանակակից թվային գրադարանում
         </p>
       </section>
 
@@ -56,29 +65,20 @@ export default function Home() {
         />
         <div className="relative px-8 py-16 md:py-24 text-center">
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Читайте без границ
+            Կարդացեք առանց սահմանների
           </h2>
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
-            Более {allBooks.length} книг, аудиокниг и научных публикаций в одном месте
+            {allBooks.length}-ից ավելի գրքեր, աուդիոգրքեր և գիտական հրապարակումներ մեկ վայրում
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/books">
-              <Button 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 shadow-lg px-8 py-4 text-lg"
-                data-testid="button-start-reading"
-              >
-                Начать чтение
-              </Button>
+              <button className="bg-white text-primary hover:bg-white/90 shadow-lg px-8 py-4 text-lg">
+                Սկսել ընթերցանությունը
+              </button>
             </Link>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg"
-              data-testid="button-learn-more"
-            >
-              Узнать больше
-            </Button>
+            <button className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg">
+              Ավելի շատ տեղեկություններ
+            </button>
           </div>
         </div>
       </div>
@@ -86,19 +86,15 @@ export default function Home() {
       {/* Categories */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
-          Популярные категории
+          Հանրաճանաչ կատեգորիաներ
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {categories.map((category) => {
             const IconComponent = category.icon;
             return (
-              <Link 
-                key={category.category} 
-                href={`/books?category=${category.category}`}
-              >
+              <Link key={category.category} href={`/books?category=${category.category}`}>
                 <div 
                   className="bg-card rounded-xl p-6 text-center hover-lift border border-border cursor-pointer"
-                  data-testid={`category-${category.category}`}
                 >
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <IconComponent className="text-primary text-2xl" size={32} />
@@ -107,7 +103,7 @@ export default function Home() {
                     {category.name}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {category.count} книг
+                    {category.count} գրքեր
                   </p>
                 </div>
               </Link>
@@ -119,11 +115,11 @@ export default function Home() {
       {/* Featured Books */}
       <section className="mb-16">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-foreground">Рекомендуемые книги</h2>
+          <h2 className="text-3xl font-bold text-foreground">Առաջարկվող գրքեր</h2>
           <Link href="/books">
-            <Button variant="link" className="text-primary hover:underline font-medium">
-              Смотреть все
-            </Button>
+            <button className="text-primary hover:underline font-medium">
+              Նայեք բոլորին
+            </button>
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -131,11 +127,10 @@ export default function Home() {
             <div 
               key={book.id} 
               className="bg-card rounded-xl overflow-hidden shadow-md hover-lift border border-border"
-              data-testid={`featured-book-${book.id}`}
             >
               <img 
                 src={book.coverUrl} 
-                alt={`Обложка книги ${book.title}`}
+                alt={`Գրքի շապիկ ${book.title}`}
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
@@ -149,23 +144,15 @@ export default function Home() {
                   {book.description}
                 </p>
                 <Link href={`/book/${book.id}`}>
-                  <Button 
+                  <button 
                     className={`w-full text-sm font-medium ${
                       book.category === "audiobook" 
                         ? "bg-accent text-accent-foreground hover:bg-accent/90" 
                         : "bg-primary text-primary-foreground hover:bg-primary/90"
                     }`}
-                    data-testid={`read-book-${book.id}`}
                   >
-                    {book.category === "audiobook" ? (
-                      <>
-                        <Headphones className="w-4 h-4 mr-2" />
-                        Слушать
-                      </>
-                    ) : (
-                      "Читать"
-                    )}
-                  </Button>
+                    {book.category === "audiobook" ? "Լսել" : "Կարդալ"}
+                  </button>
                 </Link>
               </div>
             </div>

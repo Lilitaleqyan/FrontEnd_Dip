@@ -1,98 +1,109 @@
-const BOOKS_KEY = "library_books";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 export async function initializeBooks() {
   const books = await getStoredBooks();
-  if (books.length === 0) {
-    // Create some default books
-    const defaultBooks = [
-      {
-        title: "Война и мир",
-        author: "Лев Толстой",
-        description: "Эпическая сага о русском обществе...",
-        coverUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=600",
-        category: "fiction",
-        content: `<h3>Глава 1</h3><p>...</p>`,
-        pages: 1225
-      },
-      {
-        title: "1984",
-        author: "Джордж Оруэлл",
-        description: "Антиутопия о тотальном контроле...",
-        coverUrl: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=600",
-        category: "fiction",
-        content: `<h3>Часть первая. Глава 1</h3><p>...</p>`,
-        pages: 328
-      },
-      {
-        title: "Краткая история времени",
-        author: "Стивен Хокинг",
-        description: "Введение в современную космологию...",
-        coverUrl: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=600",
-        category: "science",
-        content: `<h3>Глава 1</h3><p>...</p>`,
-        pages: 256
-      },
-      {
-        title: "Гарри Поттер и философский камень",
-        author: "Дж.К. Роулинг",
-        description: "Аудиокнига о приключениях юного волшебника...",
-        coverUrl: "https://pixabay.com/get/gb6fa2cf2a450375ba2a377159532fc2a54f918000f9c1176e531d0b36ba0841dc70cf1aa4738717b3183c0c973e5534cfc1c42f2ac50736d0b69752601eb0a2e_1280.jpg",
-        category: "audiobook",
-        audioUrl: "https://example.com/harry-potter-audiobook.mp3",
-        duration: "8ч 45м",
-        narrator: "Виктор Рыжаков"
-      }
-    ];
+  if (!books || books.length === 0) {
+    console.log("No books, initializing...");
+  }
+  return books;
+}
 
-    defaultBooks.forEach(book => createBook(book));
+
+export async function getStoredBooks() {
+  const token = localStorage.getItem("jwt_token");
+  if (!token) return [];
+
+  try {
+    const res = await fetch(`${API_URL}/admin/getAllBooks`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.books || [];
+  } catch (err) {
+    console.error("Failed to fetch books:", err);
+    return [];
+  }
+}
+async function fetchBook(id) {
+  try {
+    const response = await fetch(API_URL + `/books/${id}`);
+    const data = await response.json();
+    console.log(data.body); 
+  } catch (err) {
+    console.error(err);
   }
 }
 
-export function getStoredBooks() {
-  const stored = localStorage.getItem(BOOKS_KEY);
-  return stored ? JSON.parse(stored) : [];
+
+export async function createBook(fd) {
+
+  const token = localStorage.getItem("jwt_token");
+  if (!token) throw new Error("No JWT token");
+
+  const res = await fetch(`${API_URL}/admin/add`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: fd,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("Failed to create book:", text);
+    throw new Error("Failed to create book");
+  }
+
+  return await res.json();
+}
+export async function editBook(id, fd) {
+  const token = localStorage.getItem("jwt_token");
+  if (!token) throw new Error("No JWT token");
+
+  const res = await fetch(`${API_URL}/admin/update/${id}`, {
+    method: "PUT",
+    headers: { "Authorization": `Bearer ${token}` },
+    body: fd,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("Failed to update book:", text);
+    throw new Error("Failed to update book");
+  }
+
+  const updatedBooks = await getStoredBooks();
+  return updatedBooks;
 }
 
-export function createBook(bookData) {
-  const books = getStoredBooks();
-  const newBook = {
-    ...bookData,
-    id: Date.now().toString(),
-    rating: Math.floor(Math.random() * 2) + 4, // Random rating 4-5
-    reviewCount: Math.floor(Math.random() * 1000) + 100,
-    createdAt: new Date().toISOString()
-  };
-  books.push(newBook);
-  localStorage.setItem(BOOKS_KEY, JSON.stringify(books));
-  return newBook;
-}
 
-export function updateBook(id, bookData) {
-  const books = getStoredBooks();
-  const index = books.findIndex(b => b.id === id);
-  if (index === -1) return null;
+export async function deleteBook(id) {
+  const token = localStorage.getItem("jwt_token");
+  if (!token) throw new Error("No JWT token");
 
-  books[index] = { ...books[index], ...bookData };
-  localStorage.setItem(BOOKS_KEY, JSON.stringify(books));
-  return books[index];
-}
+  const res = await fetch(`${API_URL}/admin/removed/${id}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${token}` }
+  });
 
-export function deleteBook(id) {
-  const books = getStoredBooks();
-  const filteredBooks = books.filter(b => b.id !== id);
-  if (filteredBooks.length === books.length) return false;
-
-  localStorage.setItem(BOOKS_KEY, JSON.stringify(filteredBooks));
+  if (!res.ok) throw new Error("Failed to delete book");
   return true;
 }
 
-export function getBookById(id) {
-  const books = getStoredBooks();
+
+export async function getBookById(id) {
+  const books = await getStoredBooks();
   return books.find(b => b.id === id) || null;
 }
 
-export function searchBooks(query, category) {
-  const books = getStoredBooks();
+export async function searchBooks(query, category) {
+  const books = await getStoredBooks();
   return books.filter(book => {
     const matchesQuery = !query ||
       book.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -101,3 +112,29 @@ export function searchBooks(query, category) {
     return matchesQuery && matchesCategory;
   });
 }
+
+export async function downloadBook(id) {
+  const token = localStorage.getItem("jwt_token");
+  const response  = await fetch(`${API_URL}/full/books/download/${id}`, {
+    method:"GET", 
+    headers: {
+      Authorization:`Bearer ${token}`,
+    },
+  });
+  if(!response.ok)
+  {
+     alert("Error downloading file");
+    return;
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `book_${id}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  
+}
+

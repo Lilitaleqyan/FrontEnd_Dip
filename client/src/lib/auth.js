@@ -1,6 +1,19 @@
+
 const API_URL = import.meta.env.VITE_API_BASE_URL;
-console.log(API_URL);
-// const CURRENT_USER_KEY = "library_current_user";
+
+const CURRENT_USER_KEY = "library_current_user";
+
+function decodeJwtPayload(token) {
+  try {
+    const [, payloadBase64] = token.split(".");
+    const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(normalized);
+    return JSON.parse(json);
+  } catch (err) {
+    console.error("Failed to decode JWT payload", err);
+    return {};
+  }
+}
 
 export async function login(username, password) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
@@ -12,20 +25,88 @@ export async function login(username, password) {
 
   if (!res.ok) {
     let errorMessage = "Invalid username or password";
+    console.log(errorMessage)
     try {
       const errorData = await res.json();
       if (errorData.message) errorMessage = errorData.message;
     } catch (err) {
-      console.log(err)
-
+      console.log(err);
     }
-        throw new Error(errorMessage);
+    throw new Error(errorMessage);
+  }
+    const data = await res.json();
+    console.log(data)
+  const payload = data?.token ? decodeJwtPayload(data.token) : {};
+
+  const resolvedUsername =
+    data?.username ||
+    data?.user?.username ||
+    payload?.username ||
+    payload?.sub ||
+    "user";
+
+  const roleRaw =
+    data?.role ||
+    data?.user?.role ||
+    payload?.role ||
+    (Array.isArray(payload?.roles) ? payload.roles[0] : undefined) ||
+    (typeof payload?.sub === "string" && payload.sub.toLowerCase().includes("admin")
+      ? "ADMIN"
+      : "USER");
+
+  const role = typeof roleRaw === "string" ? roleRaw : "USER";
+
+  localStorage.setItem("jwt_token", data.token);
+  localStorage.setItem("library_current_user", JSON.stringify({
+    username: resolvedUsername,
+    role
+  }));
+  return data;
+}
+
+
+export function getCurrentUser() {
+  // prefer persisted user payload
+  const stored = localStorage.getItem("library_current_user");
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === "object" && Object.keys(parsed).length) {
+        return parsed;
+      }
+    } catch (_err) {
+      // fall through to token-based reconstruction
+    }
   }
 
-  const data = await res.json();
-  localStorage.setItem("jwt_token", data.token);
-  localStorage.setItem("current_user", JSON.stringify({username:data.username, password:data.role}))
-  return data;
+  // fallback: reconstruct from JWT if present
+  const token = localStorage.getItem("jwt_token");
+  if (!token) return null;
+
+  const payload = decodeJwtPayload(token);
+  const username =
+    payload?.username ||
+    payload?.sub ||
+    "user";
+
+  const roleRaw =
+    payload?.role ||
+    (Array.isArray(payload?.roles) ? payload.roles[0] : undefined) ||
+    (typeof payload?.sub === "string" && payload.sub.toLowerCase().includes("admin")
+      ? "ADMIN"
+      : "USER");
+
+  const role = typeof roleRaw === "string" ? roleRaw : "USER";
+
+  const reconstructed = { username, role };
+  localStorage.setItem("library_current_user", JSON.stringify(reconstructed));
+  return reconstructed;
+}
+
+export async function isAdmin() {
+  const user = await getCurrentUser();
+  // treat role comparison case-insensitively to match backend enum
+  return user?.role?.toLowerCase() === "admin";
 }
 
 export async function logout() {
@@ -34,16 +115,6 @@ export async function logout() {
     credentials:"include"
   });
 
-  // localStorage.removeItem("jwt_token")
-  // localStorage.removeItem("current_user");
-}
-
-export async function getCurrentUser() {
-  const stored = await localStorage.getItem("current_user");
-  return stored ? JSON.parse(stored) : null;
-}
-
-export async function isAdmin() {
-  const user = await getCurrentUser();
-  return user?.role === "ADMIN";
+  localStorage.removeItem("jwt_token")
+  localStorage.removeItem("library_current_user");
 }
