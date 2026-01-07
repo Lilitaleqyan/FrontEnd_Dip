@@ -80,7 +80,7 @@ export default function Footer() {
 
         {/* Footer ստորին հատված */}
         <div className="border-t border-border mt-8 pt-8 text-center">
-          <p className="text-muted-foreground">&copy; 2024 ԳրքաՊտույտ Բոլոր իրավունքները պաշտպանված են։</p>
+          <p className="text-muted-foreground">&copy; 2026 ԳրքաՊտույտ Բոլոր իրավունքները պաշտպանված են։</p>
         </div>
       </div>
     </footer>

@@ -8,17 +8,6 @@ import {
   Play, Pause, SkipBack, SkipForward, RotateCcw, RotateCw,
   Volume2, Star, Headphones,
 } from "lucide-react";
-import { MyDialog } from "./Dialog";
-
-function App() {
-  return (
-    <div>
-      <MyDialog triggerText="Open Dialog" title="My Dialog Title">
-        <p>Here goes your dialog content</p>
-      </MyDialog>
-    </div>
-  );
-}
 
 export default function Audiobooks() {
   const audioRef = useRef(new Audio());
@@ -28,14 +17,17 @@ export default function Audiobooks() {
   const [totalTime, setTotalTime] = useState("00:00");
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const [lastAudioUrl, setLastAudioUrl] = useState(""); // նոր՝ autoplay կառավարելու համար
 
   const rewind = () => {
-    audioRef.current.currentTime -= 15;
+    audioRef.current.currentTime = Math.max(audioRef.current.currentTime - 15, 0);
   };
 
   const forward = () => {
-    audioRef.current.currentTime += 30;
+    audioRef.current.currentTime = Math.min(
+      audioRef.current.currentTime + 30,
+      audioRef.current.duration || 0
+    );
   };
 
   const formatTime = (seconds) => {
@@ -45,7 +37,7 @@ export default function Audiobooks() {
     return `${m}:${s}`;
   };
 
-  // Fetch audiobooks from storage
+  // Fetch audiobooks
   useEffect(() => {
     const fetchBooks = async () => {
       const allBooks = await getStoredBooks();
@@ -60,33 +52,43 @@ export default function Audiobooks() {
     fetchBooks();
   }, []);
 
-useEffect(() => {
-  if (currentlyPlaying?.audioUrl) {
+  // Handle currently playing
+  useEffect(() => {
     const audio = audioRef.current;
-    const fileUrl = `http://localhost:8181/file${currentlyPlaying.audioUrl}`;
 
-    // Stop previous playback
-    audio.pause();
-    audio.currentTime = 0;
+    if (currentlyPlaying?.audioUrl) {
+      const fileUrl = `http://localhost:8181/file${currentlyPlaying.audioUrl}`;
 
-    // change source
-    audio.src = fileUrl;
+      // Եթե նույն աուդիոն է, ավտոմատ չնվագել
+      if (lastAudioUrl === fileUrl) return;
 
-    // Important: remove old listeners, otherwise duplicates happen
-    audio.onloadedmetadata = null;
+      // Stop previous playback
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = fileUrl;
+      setLastAudioUrl(fileUrl);
 
-    // Wait until browser loads audio metadata
-    audio.onloadedmetadata = async () => {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-      } catch (err) {
-        console.error("Playback error:", err);
-      }
+      // Remove old listener
+      audio.onloadedmetadata = null;
+
+      // Start playback when metadata is loaded
+      audio.onloadedmetadata = async () => {
+        try {
+          await audio.play();
+          setIsPlaying(true);
+        } catch (err) {
+          console.error("Playback error:", err);
+        }
+      };
+    }
+
+    // Cleanup on unmount
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+      setIsPlaying(false);
     };
-  }
-}, [currentlyPlaying]);
-
+  }, [currentlyPlaying]);
 
   // Update progress
   useEffect(() => {
@@ -198,7 +200,6 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* AudioPlayer component */}
           {currentlyPlaying?.audioUrl && (
             <AudioPlayer
               track={{

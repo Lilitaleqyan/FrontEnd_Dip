@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
-"scripts": {
-  "dev": "node server/index.js",
-  "build": "vite build",
-  "start": "node server/index.js",
-  "db:push": "drizzle-kit push"
-},
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development node server/index.js",
+    "build": "vite build && node server/build.js",
+    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "check": "echo \"No TS check needed\"",
+    "db:push": "drizzle-kit push"
+  },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",

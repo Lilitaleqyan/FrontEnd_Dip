@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { getStoredBooks, createBook, deleteBook, editBook } from "@/lib/storage";
+import { getStoredBooks, createBook, deleteBook, editBook, getAllReaders, deleteReader  } from "@/lib/storage";
 import { isAdmin } from "@/lib/auth";
 import { Plus, Search, Edit, Eye, Trash2, BookOpen, Users, Download, Headphones, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { set } from "date-fns";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
@@ -21,6 +22,8 @@ export default function Admin() {
   const { toast } = useToast();
 
   const [books, setBooks] = useState([]);
+  const [readers, setReaders] = useState([]);
+  const [loadingReaders, setLoadingReaders] = useState(false); 
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all"
@@ -70,11 +73,32 @@ export default function Admin() {
     filterBooks();
   }, [books, searchQuery, selectedCategory]);
 
-   const   loadBooks = async (allBooks) => {
+   
+  const loadBooks = async (allBooks) => {
     allBooks = await getStoredBooks();
     setBooks(allBooks || []);
     return allBooks;
   };
+
+const loadReaders = async () => {
+  try {
+    setLoadingReaders(true);
+    const data = await getAllReaders();
+    console.log("Readers data from backend:", data);
+    setReaders(data || []);
+  } catch (err) {
+    console.error("Error loading readers", err);
+  } finally {
+    setLoadingReaders(false);
+  }
+};
+
+
+  useEffect(() => {
+    loadReaders();
+  }, []);
+
+
     
   const filterBooks = () => {
     if (!Array.isArray(books)) return setFilteredBooks([]);
@@ -175,7 +199,7 @@ const handleSubmit = async (e) => {
     coverUrl: book.coverUrl,
     category: book.category,
     content: book.content || "",
-     audioUrl: null,
+    //  audioUrl: null,
     duration: book.duration || "",
     narrator: book.narrator || "",
     pages: book.pages || 0,
@@ -205,6 +229,44 @@ const handleSubmit = async (e) => {
       }
     }
   };
+
+  const handleDeleteReader = async (reader) => {
+    // Փորձում ենք գտնել ID-ն
+    const readerId = reader.id || reader.userId || reader._id || reader.user_id || reader.ID;
+    
+    if (!readerId) {
+      toast({
+        title: "Սխալ",
+        description: "Օգտատեր ID-ն չի գտնվել: Backend-ը պետք է վերադարձնի ID-ն getAllUsers response-ում",
+        variant: "destructive",
+      });
+      console.error("Reader object:", reader);
+      console.error("Available fields:", Object.keys(reader));
+      return;
+    }
+
+    if (
+      window.confirm(
+        `Վստահ ե՞ք, որ ուզում եք ջնջել ${reader.firstName} ${reader.lastName}-ին`
+      )
+    ) {
+      try {
+        await deleteReader(readerId);
+        toast({
+          title: "Օգտատերը ջնջվել է",
+          description: "Օգտատերը հաջողությամբ հեռացվել է",
+        });
+        loadReaders();
+      } catch {
+        toast({
+          title: "Սխալ",
+          description: "Չհաջողվեց ջնջել օգտատերին",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
 
 
   const resetForm = () => {
@@ -474,6 +536,67 @@ const handleSubmit = async (e) => {
           )}
         </CardContent>
       </Card>
+      <Card className="mt-10">
+  <CardHeader>
+    <CardTitle className="flex items-center gap-2">
+      <Users className="w-5 h-5" />
+      Օգտատերերի կառավարում
+    </CardTitle>
+  </CardHeader>
+
+  <CardContent>
+    {loadingReaders ? (
+      <p>Բեռնվում է...</p>
+    ) : readers.length === 0 ? (
+      <p className="text-muted-foreground">Օգտատերեր չկան</p>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {readers.map((reader, index) => {
+          // Փորձում ենք գտնել ID-ն տարբեր հնարավոր դաշտերում
+          // Key-ի համար օգտագործում ենք index-ը, որպեսզի unique լինի (email-ը կարող է կրկնվել)
+          const readerId = reader.id || reader.userId || reader._id || reader.user_id || reader.ID;
+          const uniqueKey = readerId || `${reader.email}-${index}` || `reader-${index}`;
+          return (
+            <Card key={uniqueKey} className="p-4">
+              <h3 className="font-semibold">
+                {reader.firstName} {reader.lastName}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                {reader.email}
+              </p>
+
+              <div className="flex flex-col gap-2 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Ամրագրված գրքեր:</span>
+                  <Badge variant="secondary" className="font-semibold">
+                    {reader.reservedCount || reader.reservedBooksCount || reader.reservedBooks || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Վերադարձված գրքեր:</span>
+                  <Badge variant="secondary" className="font-semibold">
+                    {reader.returnedCount || reader.returnedBooksCount || reader.returnedBooks || 0}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleDeleteReader(reader)}
+                >
+                  <Trash2 className="w-5 h-5 text-destructive" />
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    )}
+  </CardContent>
+</Card>
+
     </div>
   );
 }

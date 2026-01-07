@@ -9,13 +9,7 @@ export const MyDialog = ({ triggerText, title, children }) => {
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay" />
         <Dialog.Content className="dialog-content">
-          {/* Եթե ուզում ես title-ը տեսանելի լինի */}
           <Dialog.Title>{title}</Dialog.Title>
-
-          {/* Եթե ուզում ես title-ը թաքնված լինի accessibility-ի համար */}
-          {/* <Dialog.Title>
-            <VisuallyHidden>{title}</VisuallyHidden>
-          </Dialog.Title> */}
 
           {children}
 

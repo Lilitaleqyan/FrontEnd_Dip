@@ -1,3 +1,5 @@
+import { is } from "drizzle-orm";
+import { isAdmin } from "./auth";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 export async function initializeBooks() {
@@ -8,13 +10,39 @@ export async function initializeBooks() {
   return books;
 }
 
+export async function registerForm(user) {
+  try {
+  const res = await fetch(`${API_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      username: user.username,
+      password: user.password
+     }),
+  });
+      if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Registration failed");
+    }
+
+    return await res.json(); 
+  } catch (err) {
+    console.error("Registration error:", err.message);
+    throw err; 
+  }
+}
 
 export async function getStoredBooks() {
   const token = localStorage.getItem("jwt_token");
   if (!token) return [];
 
   try {
-    const res = await fetch(`${API_URL}/admin/getAllBooks`, {
+    const url = isAdmin() ? `${API_URL}/full/getAllBooks` : `${API_URL}/reader/books`;
+    const res = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -136,5 +164,59 @@ export async function downloadBook(id) {
   link.click();
   link.remove();
   
+}
+
+export async function getAllReaders() {
+  const token = localStorage.getItem("jwt_token");
+  if (!token) throw new Error("No JWT token");
+
+  const res = await fetch(`${API_URL}/admin/getAllUsers`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+    if (!res.ok) {
+    throw new Error("Failed to fetch readers");
+  }
+
+  return await res.json(); 
+}
+
+
+export async function deleteReader(id) {
+  const token = localStorage.getItem("jwt_token");
+  if (!token) throw new Error("No token");
+
+  if (!id) {
+    throw new Error("User ID is required");
+  }
+
+  
+  const url = `${API_URL}/admin/removeUser/${id}`;
+
+  console.log("Deleting user with ID:", id);
+  console.log("Delete URL:", url);
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  console.log("Delete response status:", res.status);
+
+  if (!res.ok) {
+    let errorText = "";
+    try {
+      errorText = await res.text();
+    } catch (e) {
+      errorText = res.statusText;
+    }
+    console.error("Delete error:", errorText);
+    throw new Error(`Failed to delete reader: ${res.status} ${errorText}`);
+  }
 }
 

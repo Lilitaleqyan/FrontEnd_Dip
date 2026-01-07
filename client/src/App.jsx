@@ -14,6 +14,7 @@ import Books from "./pages/Books";
 import BookDetail from "./pages/BookDetail";
 import Audiobooks from "./pages/Audiobooks";
 import Admin from "./pages/Admin";
+import User from "./pages/User";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -38,6 +39,7 @@ function Router() {
           <Footer />
         </ProtectedRoute>
       </Route>
+      <Route path="/register" component={User} />
       <Route path="/books">
         <ProtectedRoute>
           <Navbar />

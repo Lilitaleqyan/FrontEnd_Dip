@@ -54,7 +54,7 @@ export default function Books() {
       }
     });
 
-  // Pagination
+
   const totalPages = Math.ceil(filteredSortedBooks.length / booksPerPage);
   const startIndex = (currentPage - 1) * booksPerPage;
   const currentBooks = filteredSortedBooks.slice(startIndex, startIndex + booksPerPage);

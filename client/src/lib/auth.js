@@ -14,6 +14,36 @@ function decodeJwtPayload(token) {
     return {};
   }
 }
+export async function registerUser(user) {
+  try {
+    const res = await fetch(`${API_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    });
+
+    if (!res.ok) {
+      let errorMessage = "Registration failed";
+      try {
+        const errorData = await res.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (err) {
+      }
+      throw new Error(errorMessage);
+    }
+
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (err) {
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Registration error:", err.message);
+    throw err;
+  }
+}
 
 export async function login(username, password) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
