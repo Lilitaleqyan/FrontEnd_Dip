@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { registerUser } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
+
 export default function RegisterForm() {
   const [, setLocation] = useLocation(); 
   const { toast } = useToast();

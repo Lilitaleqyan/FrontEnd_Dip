@@ -3,6 +3,7 @@ const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 const CURRENT_USER_KEY = "library_current_user";
 
+
 function decodeJwtPayload(token) {
   try {
     const [, payloadBase64] = token.split(".");
@@ -65,34 +66,57 @@ export async function login(username, password) {
     throw new Error(errorMessage);
   }
     const data = await res.json();
-    console.log(data)
-  const payload = data?.token ? decodeJwtPayload(data.token) : {};
-
-  const resolvedUsername =
-    data?.username ||
-    data?.user?.username ||
+    console.log("Login response data:", data);
+    
+    const jwt = data?.token || data?.jwt;
+    const userId = data?.id; 
+    const responseUsername = data?.username; // Փոխել ենք անունը, որպեսզի չկոնֆլիկտի պարամետրի հետ
+    const responseRole = data?.role;
+    
+    console.log("Extracted values - userId:", userId, "username:", responseUsername, "role:", responseRole);
+    
+    if (!jwt) {
+      throw new Error("No token received from server");
+    }
+    
+    const payload = decodeJwtPayload(jwt);
+    console.log("JWT payload:", payload);
+    
+  const resolvedUsername = responseUsername ||
+    username || // օգտագործում ենք պարամետրը fallback-ի համար
     payload?.username ||
     payload?.sub ||
     "user";
 
-  const roleRaw =
-    data?.role ||
-    data?.user?.role ||
+  const roleRaw = responseRole ||
     payload?.role ||
     (Array.isArray(payload?.roles) ? payload.roles[0] : undefined) ||
     (typeof payload?.sub === "string" && payload.sub.toLowerCase().includes("admin")
       ? "ADMIN"
       : "USER");
 
-  const role = typeof roleRaw === "string" ? roleRaw : "USER";
-
-  localStorage.setItem("jwt_token", data.token);
+  const finalRole = typeof roleRaw === "string" ? roleRaw : "USER";
+  
+  // Backend-ից ստանում ենք id-ն ուղղակիորեն
+  const finalUserId = userId || 
+                 payload?.id || 
+                 payload?.userId ||
+                 payload?.sub ||
+                 payload?.user_id;
+  
+  console.log("Final userId:", finalUserId);
+  
+  localStorage.setItem("jwt_token", jwt);
   localStorage.setItem("library_current_user", JSON.stringify({
+    id: finalUserId,
     username: resolvedUsername,
-    role
+    role: finalRole
   }));
   return data;
 }
+
+
+
 
 
 export function getCurrentUser() {
@@ -127,8 +151,17 @@ export function getCurrentUser() {
       : "USER");
 
   const role = typeof roleRaw === "string" ? roleRaw : "USER";
+  // Փորձում ենք գտնել userId-ն JWT payload-ից
+  const userId = payload?.id || 
+                 payload?.userId || 
+                 payload?.user_id ||
+                 payload?.sub ||
+                 payload?.name; // երբեմն sub-ը պարունակում է ID
+  
+  console.log("getCurrentUser fallback - JWT payload:", payload);
+  console.log("getCurrentUser fallback - resolved userId:", userId);
 
-  const reconstructed = { username, role };
+  const reconstructed = { username, role, id: userId };
   localStorage.setItem("library_current_user", JSON.stringify(reconstructed));
   return reconstructed;
 }

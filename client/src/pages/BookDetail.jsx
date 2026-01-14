@@ -3,12 +3,14 @@ import { downloadBook } from "@/lib/storage";
 import { useRoute, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getBookById } from "@/lib/storage";
+import { getBookById, reservBook } from "@/lib/storage";
+import { getCurrentUser } from "@/lib/auth";
 import { 
   Star, Heart, BookOpen, Download, ChevronLeft, ChevronRight,
   Moon, Sun, Type
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
@@ -22,6 +24,8 @@ export default function BookDetail() {
   const [isLiked, setIsLiked] = useState(false);
   const totalPages = book?.pages || 1;
   const progress = ((currentPage / totalPages) * 100);
+ 
+
 
 
 
@@ -72,6 +76,66 @@ useEffect(() => {
     medium: "text-base",
     large: "text-lg"
   };
+const handleReserve = async () => {
+  const currentUser = getCurrentUser();
+  const readerId = currentUser?.id;
+  
+  const storedUser = localStorage.getItem("library_current_user");
+  const jwtToken = localStorage.getItem("jwt_token");
+  console.log("Stored user from localStorage:", storedUser);
+  console.log("JWT token exists:", !!jwtToken);
+  console.log("Current user from getCurrentUser():", currentUser);
+  console.log("Reader ID:", readerId);
+  
+  // Եթե ID չկա, փորձում ենք ստանալ JWT-ից
+  if (!readerId && jwtToken) {
+    try {
+      const [, payloadBase64] = jwtToken.split(".");
+      const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+      const json = atob(normalized);
+      const payload = JSON.parse(json);
+      console.log("JWT payload:", payload);
+    } catch (e) {
+      console.error("Failed to decode JWT:", e);
+    }
+  }
+
+  if (!readerId) {
+    toast({
+      title: "Սխալ",
+      description: "Խնդրում ենք մուտք գործել նախքան գիրքը ամրագրելը",
+      variant: "destructive",
+    });
+    return;
+  }
+  try {
+    await reservBook(book.id, readerId);
+    
+    toast({
+      title: "Գիրքը ամրագրվել է",
+      description: "Գիրքը հաջողությամբ ամրագրվել է",
+    });
+  } catch (error) {
+    console.error("Reserve error:", error);
+    const errorMessage = error.message || "Չհաջողվեց ամրագրել գիրքը";
+    
+    let translatedMessage = errorMessage;
+    if (errorMessage.includes("No available book copy found") || 
+        errorMessage.includes("available") || 
+        errorMessage.includes("copy")) {
+      translatedMessage = "Գիրքը այս պահին հասանելի չէ ամրագրման համար";
+    } else if (errorMessage.includes("already reserved") || 
+               errorMessage.includes("already")) {
+      translatedMessage = "Դուք արդեն ամրագրել եք այս գիրքը";
+    }
+    
+    toast({
+      title: "Սխալ",
+      description: translatedMessage,
+      variant: "destructive",
+    });
+  }
+};
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl fade-in">
@@ -148,13 +212,17 @@ useEffect(() => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button className="flex-1" size="lg" data-testid="button-start-reading">
-              <BookOpen className="w-5 h-5 mr-2" />
-            
-                {book.category?.toLowerCase() === "audiobook" ? "Սկսել լսել" : "Սկսել կարդալ"}
-                </Button>
+          <Button
+                className="flex-1"
+                size="lg"
+                onClick={handleReserve}
+                data-testid="button-reserve"
+              >
+                <BookOpen className="w-5 h-5 mr-2" />
+                Ամրագրել
+              </Button>
               <Button 
-                // asChild 
+                 
                 variant="outline" 
                 className="flex items-center gap-2" 
                 size="sm"

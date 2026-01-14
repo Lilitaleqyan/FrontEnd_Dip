@@ -219,4 +219,90 @@ export async function deleteReader(id) {
     throw new Error(`Failed to delete reader: ${res.status} ${errorText}`);
   }
 }
+export async function reservBook(bookId, readerId) {
+    console.log("readerId:", readerId);
+
+    const token = localStorage.getItem("jwt_token");
+    if (!token) throw new Error("No JWT token");
+
+    const res = await fetch(`${API_URL}/reader/reserv?bookId=${bookId}&id=${readerId}`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (!res.ok) {
+        const text = await res.text(); 
+        console.error("Reserve error:", text);
+        throw new Error(text || "Failed to reserve book");
+    }
+
+    return await res.json();
+}
+
+export async function returnBook(reservationId)  
+{
+    const token = localStorage.getItem("jwt_token");
+    if (!token) throw new Error("No JWT token");
+
+    const res = await fetch(`${API_URL}/admin/return/${reservationId}`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (!res.ok) {
+        const text = await res.text(); 
+        console.error("Return error:", text);
+        throw new Error("Failed to return book");
+    }
+
+    return true;
+}
+
+export async function getReservedBooks(readerId) {
+  const token = localStorage.getItem("jwt_token");
+  if (!token) throw new Error("No JWT token");
+
+  const res = await fetch(
+    `${API_URL}/admin/reservDetail/${readerId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("Fetch reserved books error:", text);
+    throw new Error("Failed to fetch reserved books");
+  }
+
+  return res.json();
+}
+
+
+export async function getReturnedBook(id) {
+    const token = localStorage.getItem("jwt_token");
+    if (!token) throw new Error("No JWT token");
+    
+    const res = await fetch(`${API_URL}/admin/returnDetail/${id}`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (!res.ok) {
+        const text = await res.text(); 
+        console.error("Return book error:", text);
+        throw new Error("Failed to return book");
+    }
+    
+    return res.json();
+
+}
 

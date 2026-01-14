@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,25 +9,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { getStoredBooks, createBook, deleteBook, editBook, getAllReaders, deleteReader  } from "@/lib/storage";
+import { getStoredBooks, createBook, deleteBook, editBook, getAllReaders, deleteReader, getReservedBooks, getReturnedBook, returnBook  } from "@/lib/storage";
 import { isAdmin } from "@/lib/auth";
 import { Plus, Search, Edit, Eye, Trash2, BookOpen, Users, Download, Headphones, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { set } from "date-fns";
+import { Check } from "lucide-react";
+
 
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
 
 export default function Admin() {
+  const [modalType, setModalType] = useState("RESERVED"); 
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-
+  const [reservedBooks, setReservedBooks] = useState([]);
+  const [returnedBooks, setReturnedBooks] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [selectedReader, setSelectedReader] = useState(null);
   const [books, setBooks] = useState([]);
   const [readers, setReaders] = useState([]);
   const [loadingReaders, setLoadingReaders] = useState(false); 
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all"
+  
   
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -266,6 +275,70 @@ const handleSubmit = async (e) => {
       }
     }
   };
+
+const openUserBooks = async (readerId, type ) => {
+  try {
+    const data = await getReservedBooks(readerId);    
+    setSelectedReader(readers.find(r => r.id === readerId));
+    setReservations(data.filter(r => r.status === type));
+    setModalType(type);
+    setOpen(true);
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
+
+// const openReturnedBooks = async (readerId, type) => {
+//   try {
+//     const data = await getReservedBooks(readerId);
+//     setSelectedReader(readers.find(r => r.id === readerId));
+//     setReturnedBooks(data.filter(r => r.status === type ));
+//     setOpen(true); 
+//     setModalType(type);
+//   } catch (e) {
+//     console.error(e);
+//     alert(e.message);
+//   }
+// };
+
+const handleReturnBook = async (reservationId) => {
+  try {
+    await returnBook(reservationId);
+
+    setReservations(prev =>
+      prev.filter(r => r.reservationId !== reservationId)
+    );
+
+    setReaders(prev =>
+  prev.map(r =>
+    r.id === selectedReader.id
+      ? {
+          ...r,
+          reservedCount: r.reservedCount - 1,
+          returnedCount: r.returnedCount + 1,
+        }
+      : r
+  )
+);
+    await loadReaders(); 
+    toast({
+      title: "Գիրքը վերադարձված է",
+      description: "Գիրքը հաջողությամբ վերադարձվել է",
+    });
+  } catch (e) {
+    toast({
+      title: "Սխալ",
+      description: "Չհաջողվեց վերադարձնել գիրքը",
+      variant: "destructive",
+    });
+  }
+};
+
+useEffect(() => {
+  console.log("Reservations:", reservations);
+}, [reservations]);
+
 
 
 
@@ -552,12 +625,12 @@ const handleSubmit = async (e) => {
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {readers.map((reader, index) => {
-          // Փորձում ենք գտնել ID-ն տարբեր հնարավոր դաշտերում
-          // Key-ի համար օգտագործում ենք index-ը, որպեսզի unique լինի (email-ը կարող է կրկնվել)
+        
           const readerId = reader.id || reader.userId || reader._id || reader.user_id || reader.ID;
           const uniqueKey = readerId || `${reader.email}-${index}` || `reader-${index}`;
           return (
             <Card key={uniqueKey} className="p-4">
+
               <h3 className="font-semibold">
                 {reader.firstName} {reader.lastName}
               </h3>
@@ -568,13 +641,21 @@ const handleSubmit = async (e) => {
               <div className="flex flex-col gap-2 mb-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Ամրագրված գրքեր:</span>
-                  <Badge variant="secondary" className="font-semibold">
+                  <Badge variant="secondary" className="font-semibold bg-red-500 text-white hover:bg-red-400" onClick={() => {
+                  setSelectedReader(reader);
+                  openUserBooks(readerId, "RESERVED");
+  }} style={{ cursor: 'pointer' }}>
                     {reader.reservedCount || reader.reservedBooksCount || reader.reservedBooks || 0}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Վերադարձված գրքեր:</span>
-                  <Badge variant="secondary" className="font-semibold">
+                  <Badge variant="secondary" className="font-semibold bg-green-500 text-white hover:bg-green-600" onClick={() => {
+                    setSelectedReader(reader);
+                    openUserBooks(readerId, "RETURNED");
+                    
+                  }}
+                    style={{ cursor: 'pointer' }}>
                     {reader.returnedCount || reader.returnedBooksCount || reader.returnedBooks || 0}
                   </Badge>
                 </div>
@@ -596,6 +677,60 @@ const handleSubmit = async (e) => {
     )}
   </CardContent>
 </Card>
+<Dialog open={open} onOpenChange={setOpen}>
+  <DialogContent className="max-w-xl">
+    <DialogHeader>
+      <DialogTitle>
+        {selectedReader?.firstName} {selectedReader?.lastName}—{" "}
+        {modalType === "RESERVED" ? "Ամրագրված գրքեր" : "Վերադարձված գրքեր"}
+      </DialogTitle>
+    </DialogHeader>
+
+    {reservations.length === 0 ? (
+      <p className="text-muted-foreground">
+      {modalType === "RESERVED" ? "Ամրագրումներ չկան" : "Վերադարձված գրքեր չկան"}
+      </p>
+    ) : (
+      <div className="space-y-3">
+       {reservations.map((r) => (
+  <Card key={r.id} className="p-3 flex gap-4">
+    <img
+     
+  src={r.coverUrl}
+  alt={r.title}
+  className="w-զ0 h-28 object-cover rounded-md border"
+/>
+
+    
+
+    <div className="flex flex-col gap-1 flex-1">
+      <p className="font-semibold">{r.title}</p>
+      <p className="text-sm text-muted-foreground">Հեղինակ՝ {r.author}</p>
+      {console.log(r)}
+      <p className="text-sm">Ամրագրման օր՝ {r.reservationDate}</p>
+
+      <Badge className="w-fit bg-red-500 text-white">{r.status}</Badge>
+    </div>
+      {modalType === "RESERVED" ? (
+    <div className="flex flex-col justify-end">
+      <Button
+        className="w-30 flex items-center justify-center bg-green-500 hover:bg-green-600"
+        onClick={() => handleReturnBook(r.id)}
+      >
+        Վերադարձված է
+      </Button>
+    </div>
+      ) : null}
+  </Card>
+))}
+
+        
+      </div>
+    )}    
+
+ </DialogContent>
+</Dialog>
+
 
     </div>
   );
