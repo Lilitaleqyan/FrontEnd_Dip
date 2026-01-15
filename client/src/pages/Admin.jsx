@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { getStoredBooks, createBook, deleteBook, editBook, getAllReaders, deleteReader, getReservedBooks, getReturnedBook, returnBook  } from "@/lib/storage";
 import { isAdmin } from "@/lib/auth";
@@ -278,12 +278,19 @@ const handleSubmit = async (e) => {
 
 const openUserBooks = async (readerId, type ) => {
   try {
-    const data = await getReservedBooks(readerId);    
+    let data;
+    if (type === "RESERVED") {
+      data = await getReservedBooks(readerId);
+    } else if (type === "RETURNED") {
+      data = await getReturnedBook(readerId);
+    }
+
     setSelectedReader(readers.find(r => r.id === readerId));
-    setReservations(data.filter(r => r.status === type));
+    setReservations(Array.isArray(data) ? data : []);
     setModalType(type);
     setOpen(true);
   } catch (e) {
+    console.error(e);
     alert(e.message);
   }
 };
@@ -678,13 +685,17 @@ useEffect(() => {
   </CardContent>
 </Card>
 <Dialog open={open} onOpenChange={setOpen}>
-  <DialogContent className="max-w-xl">
+  <DialogContent className="ax-w-xl max-h-[80vh] overflow-y-auto">
     <DialogHeader>
       <DialogTitle>
         {selectedReader?.firstName} {selectedReader?.lastName}—{" "}
         {modalType === "RESERVED" ? "Ամրագրված գրքեր" : "Վերադարձված գրքեր"}
       </DialogTitle>
     </DialogHeader>
+
+      <DialogDescription>
+        Այստեղ ցուցադրված են տվյալ ընթերցողի գրքերը
+      </DialogDescription>
 
     {reservations.length === 0 ? (
       <p className="text-muted-foreground">

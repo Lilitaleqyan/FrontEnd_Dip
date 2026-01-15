@@ -237,8 +237,10 @@ export async function reservBook(bookId, readerId) {
         console.error("Reserve error:", text);
         throw new Error(text || "Failed to reserve book");
     }
+    const text = await res.text();
+    if (!text) return null; 
+    return JSON.parse(text); 
 
-    return await res.json();
 }
 
 export async function returnBook(reservationId)  
@@ -285,12 +287,12 @@ export async function getReservedBooks(readerId) {
 }
 
 
-export async function getReturnedBook(id) {
+export async function getReturnedBook(readerId) {
     const token = localStorage.getItem("jwt_token");
     if (!token) throw new Error("No JWT token");
     
-    const res = await fetch(`${API_URL}/admin/returnDetail/${id}`, {
-        method: "POST",
+    const res = await fetch(`${API_URL}/admin/returnDetail/${readerId}`, {
+        method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`
         }

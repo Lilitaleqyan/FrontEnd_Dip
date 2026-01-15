@@ -76,66 +76,91 @@ useEffect(() => {
     medium: "text-base",
     large: "text-lg"
   };
-const handleReserve = async () => {
-  const currentUser = getCurrentUser();
-  const readerId = currentUser?.id;
-  
-  const storedUser = localStorage.getItem("library_current_user");
-  const jwtToken = localStorage.getItem("jwt_token");
-  console.log("Stored user from localStorage:", storedUser);
-  console.log("JWT token exists:", !!jwtToken);
-  console.log("Current user from getCurrentUser():", currentUser);
-  console.log("Reader ID:", readerId);
-  
-  // Եթե ID չկա, փորձում ենք ստանալ JWT-ից
-  if (!readerId && jwtToken) {
-    try {
-      const [, payloadBase64] = jwtToken.split(".");
-      const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
-      const json = atob(normalized);
-      const payload = JSON.parse(json);
-      console.log("JWT payload:", payload);
-    } catch (e) {
-      console.error("Failed to decode JWT:", e);
-    }
-  }
 
-  if (!readerId) {
-    toast({
-      title: "Սխալ",
-      description: "Խնդրում ենք մուտք գործել նախքան գիրքը ամրագրելը",
-      variant: "destructive",
-    });
-    return;
-  }
-  try {
-    await reservBook(book.id, readerId);
-    
-    toast({
-      title: "Գիրքը ամրագրվել է",
-      description: "Գիրքը հաջողությամբ ամրագրվել է",
-    });
-  } catch (error) {
-    console.error("Reserve error:", error);
-    const errorMessage = error.message || "Չհաջողվեց ամրագրել գիրքը";
-    
-    let translatedMessage = errorMessage;
-    if (errorMessage.includes("No available book copy found") || 
-        errorMessage.includes("available") || 
-        errorMessage.includes("copy")) {
-      translatedMessage = "Գիրքը այս պահին հասանելի չէ ամրագրման համար";
-    } else if (errorMessage.includes("already reserved") || 
-               errorMessage.includes("already")) {
-      translatedMessage = "Դուք արդեն ամրագրել եք այս գիրքը";
-    }
-    
-    toast({
-      title: "Սխալ",
-      description: translatedMessage,
-      variant: "destructive",
-    });
-  }
-};
+  const handleReserve = async () => {
+     const currentUser = getCurrentUser(); 
+     const readerId = currentUser?.id; 
+     const storedUser = localStorage.getItem("library_current_user"); 
+     const jwtToken = localStorage.getItem("jwt_token"); 
+     console.log("Stored user from localStorage:", storedUser);
+      console.log("JWT token exists:", !!jwtToken); 
+      console.log("Current user from getCurrentUser():", currentUser); 
+      console.log("Reader ID:", readerId); if (!readerId && jwtToken) 
+        { try { const [, payloadBase64] = jwtToken.split("."); 
+          const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/"); 
+          const json = atob(normalized); const payload = JSON.parse(json); 
+          console.log("JWT payload:", payload); 
+        } 
+          catch (e) { 
+            console.error("Failed to decode JWT:", e); } } 
+            if (!readerId)
+               { 
+                toast({ title: "Սխալ", 
+                  description: "Խնդրում ենք մուտք գործել նախքան գիրքը ամրագրելը", 
+                  variant: "destructive", });
+           return; } 
+           try { 
+            await reservBook(book.id, readerId);
+             toast({
+               title: "Գիրքը ամրագրվել է", 
+               description: "Գիրքը հաջողությամբ ամրագրվել է", }); } 
+               catch (error) 
+               { console.error("Reserve error:", error);
+                 const errorMessage = error.message || "Չհաջողվեց ամրագրել գիրքը"; 
+                 let translatedMessage = errorMessage; 
+                 if (errorMessage.includes("No available book copy found") || errorMessage.includes("available") || errorMessage.includes("copy")) 
+                  { translatedMessage = "Գիրքը այս պահին հասանելի չէ ամրագրման համար"; } 
+                 else if (errorMessage.includes("already reserved") || errorMessage.includes("already")) { 
+                  translatedMessage = "Դուք արդեն ամրագրել եք այս գիրքը"; } 
+                  toast({ title: "Սխալ", description: translatedMessage, variant: "destructive", }); } };
+// const handleReserve = async () => {
+//   const currentUser = getCurrentUser();
+//    const readerId = currentUser?.id;
+  
+//   // const storedUser = localStorage.getItem("library_current_user");
+//   // const jwtToken = localStorage.getItem("jwt_token");
+//   // console.log("Stored user from localStorage:", storedUser);
+//   // console.log("JWT token exists:", !!jwtToken);
+//   // console.log("Current user from getCurrentUser():", currentUser);
+//   // console.log("Reader ID:", readerId);
+  
+ 
+//   // if (!readerId && jwtToken) {
+//   //   try {
+//   //     const [, payloadBase64] = jwtToken.split(".");
+//   //     const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
+//   //     const json = atob(normalized);
+//   //     const payload = JSON.parse(json);
+//   //     console.log("JWT payload:", payload);
+//   //   } catch (e) {
+//   //     console.error("Failed to decode JWT:", e);
+//   //   }
+//   // }
+
+//   // if (!readerId) {
+//   //   toast({
+//   //     title: "Սխալ",
+//   //     description: "Խնդրում ենք մուտք գործել նախքան գիրքը ամրագրելը",
+//   //     variant: "destructive",
+//   //   });
+//   //   return;
+//   // }
+//  try {
+//   const result = await reservBook(book.id, readerId);
+//   toast({
+//     title: "Գիրքը ամրագրվել է",
+//     description: "Գիրքը հաջողությամբ ամրագրվել է",
+//   });
+// } catch (error) {
+//   console.error("Reserve error:", error);
+//   toast({
+//     title: "Սխալ",
+//     description: error.message || "Չհաջողվեց ամրագրել գիրքը",
+//     variant: "destructive",
+//   });
+// }
+
+// };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl fade-in">
