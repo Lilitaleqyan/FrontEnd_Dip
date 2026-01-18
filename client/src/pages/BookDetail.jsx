@@ -1,21 +1,29 @@
 import { useState, useEffect } from "react";
-import { downloadBook } from "@/lib/storage";
+import { downloadBook, addComments, viewAllComments } from "@/lib/storage";
 import { useRoute, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBookById, reservBook } from "@/lib/storage";
 import { getCurrentUser } from "@/lib/auth";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger 
+} from "@/components/ui/dialog";
 import { 
   Star, Heart, BookOpen, Download, ChevronLeft, ChevronRight,
   Moon, Sun, Type
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { set } from "date-fns";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
 
 export default function BookDetail() {
+  const [open, setOpen] = useState(false);
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState([]);
   const [, params] = useRoute("/book/:id");
   const [book, setBook] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -162,6 +170,35 @@ useEffect(() => {
 
 // };
 
+const handleAddComment = async () => {
+    if (!comment.trim()) return;
+
+    try {
+      await addComments(book.id, comment);
+      toast({
+        title: "Մեկնաբանությունը ավելացվել է",
+        description: "Ձեր մեկնաբանությունը հաջողությամբ ավելացվել է",
+      });
+      setComment(""); 
+    } catch (e) {
+      toast({
+        title: "Սխալ",
+        description: "Չհաջողվեց ավելացնել մեկնաբանությունը",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewAllComments = async() => {
+    try {
+      const allComments = await viewAllComments(book.id);
+      setComments(allComments);
+      setOpen(true);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl fade-in">
 
@@ -257,6 +294,20 @@ useEffect(() => {
               </Button>
 
           </div>
+           <div className="space-y-4 bg-muted p-4 rounded-b-lg">
+                <Textarea
+                  placeholder="Գրեք ձեր մեկնաբանությունը…"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+
+                <Button onClick={handleAddComment}>
+                  Ավելացնել մեկնաբանություն
+                </Button>
+
+                <Button onClick={handleViewAllComments}  className = "m-2">Դիտել բոլորը  </Button>
+                  
+              </div>
         </div>
       </div>
 
@@ -330,23 +381,33 @@ useEffect(() => {
                 Հաջորդ էջ <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
+           
+               
           </CardContent>
         </Card>
-      )}
+    )}
 
-      {book.category === "audiobook" && (
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Աուդիոգրքեր</h2>
-
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg">Աուդիոգրքերը հասանելի կլինի հաջորդ տարբերակներում</p>
-
-              {book.narrator && <p className="mt-2">Կարդում է՝ {book.narrator}</p>}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Բոլոր մեկնաբանությունները</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              {comments.length === 0 && <p>Մեկնաբանություններ դեռ չկան</p>}
+              {comments.map((c) => (
+                <div key={c.id} className="p-2 border-b">
+                  <p><strong>{c.id}</strong>: {c.comment}</p>
+                </div> 
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </DialogContent>
+        </Dialog>
+      
+
+
+    
     </div>
   );
 }

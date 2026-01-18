@@ -307,4 +307,40 @@ export async function getReturnedBook(readerId) {
     return res.json();
 
 }
+export async function addComments(bookId, comment) {
+    const token = localStorage.getItem("jwt_token");
+    if (!token) throw new Error("No JWT token");
 
+    const res = await fetch(`${API_URL}/full/addComment?bookId=${bookId}`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            comment
+        })
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        console.error("Add comment error:", text);
+        throw new Error(text || "Failed to add comment");
+    }
+
+    return true;
+}
+
+export async function viewAllComments(bookId) {
+    const token = localStorage.getItem("jwt_token");
+    if (!token) throw new Error("No JWT token");
+
+    const res = await fetch(`${API_URL}/full/viewComments?bookId=${bookId}`, {
+        method: "GET",
+        headers: {
+    "Authorization": `Bearer ${token}`
+  }
+});
+
+return res.json();
+}

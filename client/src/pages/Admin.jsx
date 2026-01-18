@@ -349,6 +349,8 @@ useEffect(() => {
 
 
 
+
+
   const resetForm = () => {
    setEditingBook(null)
     setFormData({
@@ -712,15 +714,14 @@ useEffect(() => {
   className="w-զ0 h-28 object-cover rounded-md border"
 />
 
-    
-
     <div className="flex flex-col gap-1 flex-1">
       <p className="font-semibold">{r.title}</p>
       <p className="text-sm text-muted-foreground">Հեղինակ՝ {r.author}</p>
       {console.log(r)}
       <p className="text-sm">Ամրագրման օր՝ {r.reservationDate}</p>
-
-      <Badge className="w-fit bg-red-500 text-white">{r.status}</Badge>
+        {modalType === "RESERVED" ? (
+      <Badge className="w-fit bg-red-500 text-white">{r.status}</Badge>) :  <Badge className="w-fit bg-green-500 text-white">{r.status}</Badge>}
+   
     </div>
       {modalType === "RESERVED" ? (
     <div className="flex flex-col justify-end">
@@ -733,16 +734,11 @@ useEffect(() => {
     </div>
       ) : null}
   </Card>
-))}
-
-        
+))}  
       </div>
     )}    
-
  </DialogContent>
 </Dialog>
-
-
-    </div>
+   </div>
   );
 }
