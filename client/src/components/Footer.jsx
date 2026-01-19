@@ -8,7 +8,6 @@ export default function Footer() {
 
   const handleSubscribe = (e) => {
     e.preventDefault();
-    // Արդյունավետ բաժանորդագրության լոգիկան այստեղ
     setEmail("");
   };
 
@@ -38,7 +37,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Բաժիններ */}
           <div>
             <h3 className="text-foreground font-semibold mb-4">Բաժիններ</h3>
             <ul className="space-y-2">
@@ -48,7 +46,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Աջակցություն */}
           <div>
             <h3 className="text-foreground font-semibold mb-4">Աջակցություն</h3>
             <ul className="space-y-2">
@@ -59,7 +56,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Բաժանորդագրություն */}
           <div>
             <h3 className="text-foreground font-semibold mb-4">Բաժանորդագրություն</h3>
             <p className="text-muted-foreground mb-4">Ստացեք ծանուցումներ նոր գրքերի մասին</p>
@@ -78,7 +74,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Footer ստորին հատված */}
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-muted-foreground">&copy; 2026 ԳրքաՊտույտ Բոլոր իրավունքները պաշտպանված են։</p>
         </div>
