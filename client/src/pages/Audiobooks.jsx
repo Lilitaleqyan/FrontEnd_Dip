@@ -37,7 +37,6 @@ export default function Audiobooks() {
     return `${m}:${s}`;
   };
 
-  // Fetch audiobooks
   useEffect(() => {
     const fetchBooks = async () => {
       const allBooks = await getStoredBooks();
@@ -52,26 +51,21 @@ export default function Audiobooks() {
     fetchBooks();
   }, []);
 
-  // Handle currently playing
   useEffect(() => {
     const audio = audioRef.current;
 
     if (currentlyPlaying?.audioUrl) {
       const fileUrl = `http://localhost:8181/file${currentlyPlaying.audioUrl}`;
 
-      // Եթե նույն աուդիոն է, ավտոմատ չնվագել
       if (lastAudioUrl === fileUrl) return;
 
-      // Stop previous playback
       audio.pause();
       audio.currentTime = 0;
       audio.src = fileUrl;
       setLastAudioUrl(fileUrl);
 
-      // Remove old listener
       audio.onloadedmetadata = null;
 
-      // Start playback when metadata is loaded
       audio.onloadedmetadata = async () => {
         try {
           await audio.play();
@@ -82,7 +76,6 @@ export default function Audiobooks() {
       };
     }
 
-    // Cleanup on unmount
     return () => {
       audio.pause();
       audio.currentTime = 0;
@@ -90,7 +83,6 @@ export default function Audiobooks() {
     };
   }, [currentlyPlaying]);
 
-  // Update progress
   useEffect(() => {
     const audio = audioRef.current;
 

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Grid, List, Star, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { getBooks } from "@/lib/api";
-const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
+const API_URL = import.meta.env.VITE_API_BASE_URL; // backend URL
 
 export default function Books() {
   const [location] = useLocation();
@@ -20,13 +20,11 @@ export default function Books() {
   const [currentPage, setCurrentPage] = useState(1);
   const booksPerPage = 12;
 
-  // React Query fetch
   const { data: booksData = [], isLoading, error } = useQuery({
     queryKey:["books"],
     queryFn: getBooks,
   });
 
-  // Parse URL search params
   useEffect(() => {
     const urlParams = new URLSearchParams(location.split("?")[1] || "");
     setFilters(prev => ({
@@ -36,7 +34,6 @@ export default function Books() {
     }));
   }, [location]);
 
-  // Filter & sort books client-side
   const filteredSortedBooks = booksData
     .filter(book => {
       const matchTitle = book.title.toLowerCase().includes(filters.title.toLowerCase());
@@ -105,7 +102,6 @@ export default function Books() {
 
   return (
     <div className="container mx-auto px-4 py-8 fade-in">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">Գրքերի կատալոգ</h1>
@@ -114,7 +110,6 @@ export default function Books() {
           </p>
         </div>
 
-        {/* Sort & View mode */}
         <div className="flex gap-4">
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-48">
@@ -149,7 +144,6 @@ export default function Books() {
         </div>
       </div>
 
-      {/* Filters */}
       <Card className="mb-8">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -193,7 +187,6 @@ export default function Books() {
         </CardContent>
       </Card>
 
-      {/* Books */}
       {currentBooks.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground text-lg">
@@ -237,7 +230,7 @@ export default function Books() {
                   </Link>
                 </div>
              <Button 
-                // asChild 
+                 
                 variant="outline" 
                 className="flex items-center gap-2" 
                 size="sm"
@@ -252,7 +245,6 @@ export default function Books() {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">

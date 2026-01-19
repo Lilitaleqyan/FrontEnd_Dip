@@ -70,7 +70,7 @@ export async function login(username, password) {
     
     const jwt = data?.token || data?.jwt;
     const userId = data?.id; 
-    const responseUsername = data?.username; // Փոխել ենք անունը, որպեսզի չկոնֆլիկտի պարամետրի հետ
+    const responseUsername = data?.username; 
     const responseRole = data?.role;
     
     console.log("Extracted values - userId:", userId, "username:", responseUsername, "role:", responseRole);
@@ -83,7 +83,7 @@ export async function login(username, password) {
     console.log("JWT payload:", payload);
     
   const resolvedUsername = responseUsername ||
-    username || // օգտագործում ենք պարամետրը fallback-ի համար
+    username || 
     payload?.username ||
     payload?.sub ||
     "user";
@@ -97,7 +97,6 @@ export async function login(username, password) {
 
   const finalRole = typeof roleRaw === "string" ? roleRaw : "USER";
   
-  // Backend-ից ստանում ենք id-ն ուղղակիորեն
   const finalUserId = userId || 
                  payload?.id || 
                  payload?.userId ||
@@ -120,7 +119,6 @@ export async function login(username, password) {
 
 
 export function getCurrentUser() {
-  // prefer persisted user payload
   const stored = localStorage.getItem("library_current_user");
   if (stored) {
     try {
@@ -129,11 +127,9 @@ export function getCurrentUser() {
         return parsed;
       }
     } catch (_err) {
-      // fall through to token-based reconstruction
     }
   }
 
-  // fallback: reconstruct from JWT if present
   const token = localStorage.getItem("jwt_token");
   if (!token) return null;
 
@@ -151,12 +147,11 @@ export function getCurrentUser() {
       : "USER");
 
   const role = typeof roleRaw === "string" ? roleRaw : "USER";
-  // Փորձում ենք գտնել userId-ն JWT payload-ից
   const userId = payload?.id || 
                  payload?.userId || 
                  payload?.user_id ||
                  payload?.sub ||
-                 payload?.name; // երբեմն sub-ը պարունակում է ID
+                 payload?.name; 
   
   console.log("getCurrentUser fallback - JWT payload:", payload);
   console.log("getCurrentUser fallback - resolved userId:", userId);
@@ -168,7 +163,6 @@ export function getCurrentUser() {
 
 export async function isAdmin() {
   const user = await getCurrentUser();
-  // treat role comparison case-insensitively to match backend enum
   return user?.role?.toLowerCase() === "admin";
 }
 

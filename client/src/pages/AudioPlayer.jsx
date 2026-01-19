@@ -1,4 +1,3 @@
-// AudioPlayer.jsx
 import { useRef, useState, useEffect } from "react";
 
 const AudioPlayer = ({ track }) => {

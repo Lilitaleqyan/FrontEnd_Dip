@@ -45,7 +45,6 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-16 fade-in">
-      {/* Hero Section */}
       <section className="text-center mb-12">
         <h1 className="text-5xl font-bold text-foreground mb-4">
           Բարի գալուստ ԳրքաՊտույտ
@@ -55,7 +54,6 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Hero Banner */}
       <div className="relative bg-gradient-to-r from-primary to-accent rounded-2xl overflow-hidden mb-16 shadow-xl">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-20" 
@@ -83,7 +81,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Categories */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
           Հանրաճանաչ կատեգորիաներ
@@ -112,7 +109,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Books */}
+   
       <section className="mb-16">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-foreground">Առաջարկվող գրքեր</h2>

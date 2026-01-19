@@ -240,7 +240,6 @@ const handleSubmit = async (e) => {
   };
 
   const handleDeleteReader = async (reader) => {
-    // Փորձում ենք գտնել ID-ն
     const readerId = reader.id || reader.userId || reader._id || reader.user_id || reader.ID;
     
     if (!readerId) {
