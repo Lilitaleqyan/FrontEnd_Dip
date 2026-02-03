@@ -394,13 +394,27 @@ const handleAddComment = async () => {
             <DialogHeader>
               <DialogTitle>Բոլոր մեկնաբանությունները</DialogTitle>
             </DialogHeader>
-            <div className="mt-4">
-              {comments.length === 0 && <p>Մեկնաբանություններ դեռ չկան</p>}
-              {comments.map((c) => (
-                <div key={c.id} className="p-2 border-b">
-                  <p><strong>{c.id}</strong>: {c.comment}</p>
-                </div> 
-              ))}
+            <div className="mt-1">
+             <div className="mt-2 border border-border rounded-lg overflow-scroll h-96 ">
+  {comments.length === 0 && <p className="text-muted-foreground text-center">Մեկնաբանություններ դեռ չկան</p>}
+  {comments.map((c) => (
+    <div key={c.id} className="p-3 border-b last:border-0 hover:bg-muted/50 transition-colors"> 
+   
+      <p className="text-sm ">
+        <span className="font-bold text-primary">{c.username || "Անանուն"}</span>
+        <span className="mx-1">:</span>
+        <span className="text-foreground">{c.comment}</span>
+        <span className="ml-2 text-xs text-muted-foreground">{c.creationDate}</span>
+      </p>
+ 
+      {c.createdAt && (
+        <span className="text-[10px] text-muted-foreground block mt-1">
+          {new Date(c.createdAt).toLocaleDateString()}
+        </span>
+      )}
+    </div> 
+  ))}
+</div>
             </div>
           </DialogContent>
         </Dialog>

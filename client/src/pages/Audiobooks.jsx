@@ -13,11 +13,11 @@ export default function Audiobooks() {
   const audioRef = useRef(new Audio());
   const [audiobooks, setAudiobooks] = useState([]);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
-  const [currentTime, setCurrentTime] = useState("00:00");
-  const [totalTime, setTotalTime] = useState("00:00");
+  const [currentTime, setCurrentTime] = useState("00:00։00");
+  const [totalTime, setTotalTime] = useState("00:00:00");
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [lastAudioUrl, setLastAudioUrl] = useState(""); // նոր՝ autoplay կառավարելու համար
+  const [lastAudioUrl, setLastAudioUrl] = useState(""); 
 
   const rewind = () => {
     audioRef.current.currentTime = Math.max(audioRef.current.currentTime - 15, 0);
@@ -25,17 +25,19 @@ export default function Audiobooks() {
 
   const forward = () => {
     audioRef.current.currentTime = Math.min(
-      audioRef.current.currentTime + 30,
+      audioRef.current.currentTime + 15,
       audioRef.current.duration || 0
     );
   };
 
   const formatTime = (seconds) => {
-    if (!seconds) return "00:00";
-    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    if (!seconds) return "00:00:00";
+    const h = Math.floor(seconds / 3600).toString().padStart(2, "0");
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
     const s = Math.floor(seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
+    return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+  }
+ 
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -134,7 +136,7 @@ export default function Audiobooks() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-foreground mb-4">Աուդիոգրքեր</h1>
         <p className="text-xl text-muted-foreground">
-          Լսեք ձեր սիրած գրքերը ճանապարհին ({audiobooks.length} աուդիոգիրք)
+          Լսեք ձեր սիրելի գրքերը ճանապարհին ({audiobooks.length} աուդիոգիրք)
         </p>
       </div>
 
@@ -151,7 +153,7 @@ export default function Audiobooks() {
                 <h3 className="text-2xl font-bold mb-2">{currentlyPlaying.title}</h3>
                 <p className="text-white/80 text-lg">{currentlyPlaying.author}</p>
                 {currentlyPlaying.narrator && (
-                  <p className="text-white/60 text-sm">Ընթերցում է․ {currentlyPlaying.narrator}</p>
+                  <p className="text-white/60 text-sm">Ընթերցում է՝  {currentlyPlaying.narrator}ը</p>
                 )}
               </div>
             </div>
@@ -174,7 +176,7 @@ export default function Audiobooks() {
               </Button>
               <Button variant="ghost" size="lg" onClick={rewind}>
                 <RotateCcw className="w-5 h-5" />
-                <span className="text-sm ml-1">15վ</span>
+                <span className="text-sm ml-1">30վ</span>
               </Button>
               <Button
                 onClick={handlePlayPause}
@@ -233,10 +235,7 @@ export default function Audiobooks() {
                 <p className="text-muted-foreground text-sm mb-2">{book.author}</p>
                 {book.narrator && <p className="text-xs text-muted-foreground mb-3">Ընթերցում է․ {book.narrator}</p>}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex mr-2">{renderStars(book.rating)}</div>
-                    <span className="text-xs text-muted-foreground">{book.rating}</span>
-                  </div>
+
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -246,7 +245,7 @@ export default function Audiobooks() {
                       <Play className="w-3 h-3 mr-1" /> Լսել
                     </Button>
                     <Link href={`/book/${book.id}`}>
-                      <Button size="sm" variant="outline">
+                      <Button className = " ml-10" size="sm" variant="outline">
                         Մանրամասներ
                       </Button>
                     </Link>

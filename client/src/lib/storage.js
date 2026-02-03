@@ -318,8 +318,8 @@ export async function addComments(bookId, comment) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            comment
-        })
+            comment,
+       })
     });
 
     if (!res.ok) {

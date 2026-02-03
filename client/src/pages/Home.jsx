@@ -30,7 +30,7 @@ export default function Home() {
       category: "science"
     },
     {
-      name: "Ուսուցողական",
+      name: "Ուսումնական",
       count: allBooks.filter(b => b.category === "educational").length,
       icon: GraduationCap,
       category: "educational"
@@ -144,8 +144,8 @@ export default function Home() {
                   <button 
                     className={`w-full text-sm font-medium ${
                       book.category === "audiobook" 
-                        ? "bg-accent text-accent-foreground hover:bg-accent/90" 
-                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        ? "p-1 bg-accent text-accent-foreground hover:bg-accent/90" 
+                        : "p-1 bg-primary text-primary-foreground hover:bg-primary/90"
                     }`}
                   >
                     {book.category === "audiobook" ? "Լսել" : "Կարդալ"}
