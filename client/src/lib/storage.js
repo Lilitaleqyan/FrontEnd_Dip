@@ -213,6 +213,7 @@ export async function deleteReader(id) {
     try {
       errorText = await res.text();
     } catch (e) {
+      
       errorText = res.statusText;
     }
     console.error("Delete error:", errorText);

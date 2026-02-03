@@ -354,6 +354,7 @@ const handleAddComment = async () => {
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 data-testid="prev-page"
               >
+                
                 <ChevronLeft className="w-4 h-4 mr-2" /> Նախորդ էջ
               </Button>
               

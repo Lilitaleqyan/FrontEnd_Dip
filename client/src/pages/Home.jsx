@@ -137,6 +137,7 @@ export default function Home() {
                 <p className="text-muted-foreground text-sm mb-2">
                   {book.author}
                 </p>
+                
                 <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
                   {book.description}
                 </p>

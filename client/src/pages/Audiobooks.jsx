@@ -236,7 +236,7 @@ export default function Audiobooks() {
                 {book.narrator && <p className="text-xs text-muted-foreground mb-3">Ընթերցում է․ {book.narrator}</p>}
                 <div className="flex items-center justify-between">
 
-                  <div className="flex gap-2">
+                 <div className="flex gap-2">
                     <Button
                       size="sm"
                       onClick={() => handleBookSelect(book)}
