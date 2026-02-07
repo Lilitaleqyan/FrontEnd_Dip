@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { getStoredBooks } from "@/lib/storage";
 import { Book, BookOpen, Headphones, Microscope, GraduationCap } from "lucide-react";
+import ChatWindow from "./ChatWindow";
 
 export default function Home() {
   const [allBooks, setAllBooks] = useState([]);
@@ -157,6 +158,10 @@ export default function Home() {
           ))}
         </div>
       </section>
+      <div className="container mx-auto px-4 py-8 space-y-16 fade-in">
+      <ChatWindow />
     </div>
+    </div>
+    
   );
 }

@@ -345,3 +345,26 @@ export async function viewAllComments(bookId) {
 
 return res.json();
 }
+
+export async function sendMessage(message) {
+    const token = localStorage.getItem("jwt_token");
+    if (!token) throw new Error("No JWT token");
+    
+    const res = await fetch(`${API_URL}/chat`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message })
+    });
+    if (!res.ok) {  
+
+        const text = await res.text();
+        console.error("Send message error:", text);
+        throw new Error("Failed to send message");
+    }
+
+    return res.json();
+    
+}
