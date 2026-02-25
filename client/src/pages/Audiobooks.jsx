@@ -58,6 +58,7 @@ export default function Audiobooks() {
 
     if (currentlyPlaying?.audioUrl) {
       const fileUrl = `http://localhost:8181/file${currentlyPlaying.audioUrl}`;
+      console.log(fileUrl)
 
       if (lastAudioUrl === fileUrl) return;
 

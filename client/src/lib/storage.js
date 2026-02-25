@@ -367,4 +367,38 @@ export async function sendMessage(message) {
 
     return res.json();
     
+  
+}
+
+export async function forgotPassword(resetEmail) {
+  const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email: resetEmail }),
+});
+if(!res.ok) {
+   const text = await res.text();
+        console.error("Send message error:", text);
+        throw new Error("Failed to open forgot password");
+}
+  return res.json();
+}
+
+
+export async function resetPassword(token, newPassword) {
+  const res = await fetch(`${API_URL}/api/auth/reset-password`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    token,
+    password: newPassword
+  }),
+  
+});
+if(!res.ok) {
+   const text = await res.text();
+        console.error("Send message error:", text);
+        throw new Error("Failed to open forgot password");
+}
+  return res.text();
 }

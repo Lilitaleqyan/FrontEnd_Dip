@@ -16,15 +16,12 @@ import Audiobooks from "./pages/Audiobooks";
 import Admin from "./pages/Admin";
 import User from "./pages/User";
 import NotFound from "@/pages/not-found";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const user = getCurrentUser();
-  if (!user) {
-    return <Redirect to="/login"/>;
-  }
-  if (adminOnly && user?.role?.toLowerCase() !== "admin") {
-    return <Redirect to="/"/>;
-  }
+  if (!user) return <Redirect to="/login" />;
+  if (adminOnly && user?.role?.toLowerCase() !== "admin") return <Redirect to="/" />;
   return <>{children}</>;
 }
 
@@ -32,6 +29,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/">
         <ProtectedRoute>
           <Navbar />
@@ -75,7 +73,6 @@ function Router() {
 
 function App() {
   useEffect(() => {
-   
     initializeBooks();
   }, []);
 
