@@ -11,11 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { 
   Star, Heart, BookOpen, Download, ChevronLeft, ChevronRight,
-  Moon, Sun, Type
+  Moon, Sun, Type,
+  BookMarked, Bookmark
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { set } from "date-fns";
+import { is } from "drizzle-orm";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
@@ -30,12 +32,37 @@ export default function BookDetail() {
   const [fontSize, setFontSize] = useState("medium");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+ 
   const totalPages = book?.pages || 1;
   const progress = ((currentPage / totalPages) * 100);
  
 
+useEffect(() => {
+  if (params?.id) {
+    const token = localStorage.getItem("jwt_token");
 
+    async function fetchBookAndStatus() {
+      const foundBook = await getBookById(Number(params.id));
+      setBook(foundBook);
 
+      if (token) {
+        try {
+          const response = await fetch("http://localhost:8181/reader/findFavoritesBook", {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const favorites = await response.json();
+            const isBookInFavorites = favorites.some(fav => fav.id === Number(params.id));
+            setIsLiked(isBookInFavorites);
+          }
+        } catch (error) {
+          console.error("Error fetching favorite status:", error);
+        }
+      }
+    }
+    fetchBookAndStatus();
+  }
+}, [params?.id]);
 
 useEffect(() => {
   if (params?.id) {
@@ -75,8 +102,9 @@ useEffect(() => {
   const categoryLabels = {
     fiction: "Գեղարվեստական",
     science: "Գիտական",
-    educational: "Ուսումնական",
-    audiobook: "Աուդիոգրքեր"
+    autobiography: "Ինքնակենսագրություն",
+    audiobook: "Աուդիոգրքեր",
+    detective: "Դետեկտիվ"
   };
 
   const fontSizeClasses = {
@@ -121,54 +149,6 @@ useEffect(() => {
                  else if (errorMessage.includes("already reserved") || errorMessage.includes("already")) { 
                   translatedMessage = "Դուք արդեն ամրագրել եք այս գիրքը"; } 
                   toast({ title: "Սխալ", description: translatedMessage, variant: "destructive", }); } };
-// const handleReserve = async () => {
-//   const currentUser = getCurrentUser();
-//    const readerId = currentUser?.id;
-  
-//   // const storedUser = localStorage.getItem("library_current_user");
-//   // const jwtToken = localStorage.getItem("jwt_token");
-//   // console.log("Stored user from localStorage:", storedUser);
-//   // console.log("JWT token exists:", !!jwtToken);
-//   // console.log("Current user from getCurrentUser():", currentUser);
-//   // console.log("Reader ID:", readerId);
-  
- 
-//   // if (!readerId && jwtToken) {
-//   //   try {
-//   //     const [, payloadBase64] = jwtToken.split(".");
-//   //     const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
-//   //     const json = atob(normalized);
-//   //     const payload = JSON.parse(json);
-//   //     console.log("JWT payload:", payload);
-//   //   } catch (e) {
-//   //     console.error("Failed to decode JWT:", e);
-//   //   }
-//   // }
-
-//   // if (!readerId) {
-//   //   toast({
-//   //     title: "Սխալ",
-//   //     description: "Խնդրում ենք մուտք գործել նախքան գիրքը ամրագրելը",
-//   //     variant: "destructive",
-//   //   });
-//   //   return;
-//   // }
-//  try {
-//   const result = await reservBook(book.id, readerId);
-//   toast({
-//     title: "Գիրքը ամրագրվել է",
-//     description: "Գիրքը հաջողությամբ ամրագրվել է",
-//   });
-// } catch (error) {
-//   console.error("Reserve error:", error);
-//   toast({
-//     title: "Սխալ",
-//     description: error.message || "Չհաջողվեց ամրագրել գիրքը",
-//     variant: "destructive",
-//   });
-// }
-
-// };
 
 const handleAddComment = async () => {
     if (!comment.trim()) return;
@@ -199,6 +179,34 @@ const handleAddComment = async () => {
     }
   };
 
+  
+
+const toggleLike = async () => {
+  const token = localStorage.getItem("jwt_token");
+  if (!token) return;
+
+  const method = isLiked ? "DELETE" : "POST"; 
+  const endpoint = isLiked ? "unFavorite" : "favorite"; 
+
+  try {
+    const response = await fetch(`http://localhost:8181/reader/${book.id}/${endpoint}`, {
+      method: method,
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      setIsLiked(!isLiked);
+      toast({
+        title: isLiked ? "Հեռացվեց հավանածներից" : "Ավելացվեց հավանածների մեջ",
+        variant: "default",
+      });
+    }
+  } catch (error) {
+    console.error("Error toggling favorite:", error);
+  }
+};
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl fade-in">
 
@@ -227,34 +235,24 @@ const handleAddComment = async () => {
               </p>
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsLiked(!isLiked)}
-              data-testid="button-like"
-            >
-              <Heart className={`w-6 h-6 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-            </Button>
+         <Button
+            variant={isLiked?"default" : "outline"}
+            size="sm"
+            onClick={toggleLike}
+            className="flex items-center gap-2 rounded-full px-4">
+          <Heart className={`w-4 h-4 ${isLiked ? "fill-white" : ""}`} />
+            {isLiked ? "Հավանած է" : "Հավանել"}
+</Button>
+
           </div>
           
-          <div className="flex items-center mb-6">
-            <div className="flex mr-3">{renderStars(book.rating)}</div>
-            <span className="text-foreground font-medium">{book.rating}</span>
-            <span className="text-muted-foreground ml-2">({book.reviewCount} գնահատական)</span>
-          </div>
-
+      
           <p className="text-muted-foreground text-lg mb-6 leading-relaxed" data-testid="book-description">
             {book.description}
           </p>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
-            {book.pages && (
-              <div className="bg-muted rounded-lg p-4">
-                <p className="text-muted-foreground text-sm">Էջեր</p>
-                <p className="text-foreground font-semibold">{book.pages.toLocaleString()}</p>
-              </div>
-            )}
-
+         
             {book.duration && (
               <div className="bg-muted rounded-lg p-4">
                 <p className="text-muted-foreground text-sm">Տևողություն</p>
@@ -262,14 +260,11 @@ const handleAddComment = async () => {
               </div>
             )}
 
-            <div className="bg-muted rounded-lg p-4">
-              <p className="text-muted-foreground text-sm">Լեզու</p>
-              <p className="text-foreground font-semibold">Հայերեն</p>
-            </div>
+            
 
             <div className="bg-muted rounded-lg p-4">
-              <p className="text-muted-foreground text-sm">Վարկանիշ</p>
-              <p className="text-foreground font-semibold">{book.rating}/5</p>
+              <p className="text-muted-foreground text-sm">Էջերի քանակը</p>
+              <p className="text-foreground font-semibold">{book.pages}</p>
             </div>
           </div>
 

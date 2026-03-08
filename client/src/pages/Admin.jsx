@@ -34,10 +34,8 @@ export default function Admin() {
   const [loadingReaders, setLoadingReaders] = useState(false); 
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all"
-  
-  
-  );
+  const [selectedCategory, setSelectedCategory] = useState("all")
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [formData, setFormData] = useState( {
@@ -73,8 +71,7 @@ export default function Admin() {
       {
         console.error("error loading books")
       }
-      // const allBooks = await getStoredBooks();
-      // setBooks(allBooks || []);
+      
     }) ()
   }, []);
 
@@ -173,7 +170,7 @@ const handleSubmit = async (e) => {
       // console.log(editingBook.id)
       await editBook(editingBook.id, fd);
       toast({
-        title: "Գիրքը թարմացAվել է",
+        title: "Գիրքը թարմացվել է",
         description: "Գրքի տվյալները հաջողությամբ թարմացվել են",
       });
     } else {
@@ -295,19 +292,6 @@ const openUserBooks = async (readerId, type ) => {
 };
 
 
-// const openReturnedBooks = async (readerId, type) => {
-//   try {
-//     const data = await getReservedBooks(readerId);
-//     setSelectedReader(readers.find(r => r.id === readerId));
-//     setReturnedBooks(data.filter(r => r.status === type ));
-//     setOpen(true); 
-//     setModalType(type);
-//   } catch (e) {
-//     console.error(e);
-//     alert(e.message);
-//   }
-// };
-
 const handleReturnBook = async (reservationId) => {
   try {
     await returnBook(reservationId);
@@ -345,11 +329,6 @@ useEffect(() => {
   console.log("Reservations:", reservations);
 }, [reservations]);
 
-
-
-
-
-
   const resetForm = () => {
    setEditingBook(null)
     setFormData({
@@ -368,21 +347,15 @@ useEffect(() => {
     });
   };
 
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${i < Math.floor(rating) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
-      />
-    ));
-  };
+
 
   const categoryLabels = {
     all: "Բոլոր կատեգորիաները",
     fiction: "Գեղարվեստական",
     science: "Գիտական",
-    educational: "Ուսումնական",
-    audiobook: "Աուդիոգրքեր"
+    autobiography: "Ինքնակենսագրություն",
+    audiobook: "Աուդիոգրքեր",
+    detective: "Դետեկտիվ"
   };
 
   const stats = {

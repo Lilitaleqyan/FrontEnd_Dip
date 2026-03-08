@@ -49,6 +49,7 @@ export default function Audiobooks() {
       if (audiobookList.length > 0 && !currentlyPlaying) {
         setCurrentlyPlaying(audiobookList[0]);
       }
+      
     };
     fetchBooks();
   }, []);
@@ -131,6 +132,21 @@ export default function Audiobooks() {
       />
     ));
   };
+  useEffect(() => {
+  const stopAudio = () => {
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    audioRef.current.src = "";
+    setIsPlaying(false);
+    setCurrentlyPlaying(null);
+  };
+
+  window.addEventListener("forceAudioStop", stopAudio);
+
+  return () => {
+    window.removeEventListener("forceAudioStop", stopAudio);
+  };
+}, []);
 
   return (
     <div className="container mx-auto px-4 py-8 fade-in">
@@ -195,13 +211,13 @@ export default function Audiobooks() {
             </div>
           </div>
 
-          {currentlyPlaying?.audioUrl && (
+          {/* {currentlyPlaying?.audioUrl && (
             <AudioPlayer
               track={{
                 audioUrl: `http://localhost:8181/file${currentlyPlaying.audioUrl}`,
               }}
             />
-          )}
+          )} */}
         </div>
       )}
 

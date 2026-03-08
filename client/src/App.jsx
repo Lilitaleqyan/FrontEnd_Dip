@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getCurrentUser } from "./lib/auth";
 import { initializeBooks } from "./lib/storage";
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Login from "./pages/Login";
@@ -17,6 +18,7 @@ import Admin from "./pages/Admin";
 import User from "./pages/User";
 import NotFound from "@/pages/not-found";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import FavoritesPage from "./pages/FavoritesPage"
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const user = getCurrentUser();
@@ -25,11 +27,13 @@ function ProtectedRoute({ children, adminOnly = false }) {
   return <>{children}</>;
 }
 
+
 function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/reset-password" component={ResetPasswordPage} />
+      {/* <Route path="/favorites" component={FavoritesPage} /> */}
       <Route path="/">
         <ProtectedRoute>
           <Navbar />
@@ -66,6 +70,13 @@ function Router() {
           <Footer />
         </ProtectedRoute>
       </Route>
+      <Route path="/favorites">
+        <ProtectedRoute>
+          <Navbar />
+          <FavoritesPage />
+          <Footer />
+        </ProtectedRoute>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -75,6 +86,8 @@ function App() {
   useEffect(() => {
     initializeBooks();
   }, []);
+
+
 
   return (
     <QueryClientProvider client={queryClient}>

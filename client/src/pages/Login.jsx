@@ -106,6 +106,12 @@ export default function Login() {
     });
   }
 };
+const handleLogout = () => {
+  window.dispatchEvent(new Event("forceAudioStop"));
+
+  localStorage.removeItem("token");
+  setLocation("/");
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -127,6 +133,7 @@ export default function Login() {
               <>
                 <RegisterForm />
                 <Button
+                 
                   variant="link"
                   className="w-full mt-4"
                   onClick={() => setIsRegister(false)}
@@ -186,7 +193,11 @@ export default function Login() {
                       <Label htmlFor="remember">Հիշել ինձ</Label>
                     </div>
 
-                    <Button variant="link" size="sm" onClick={() => setShowForgotPassword(true)}>
+                    <Button
+                    type = "button"
+                     variant="link" 
+                     size="sm" 
+                     onClick={() => setShowForgotPassword(true)}>
                       Մոռացել եք գաղտնաբառը?
                     </Button>
                   </div>

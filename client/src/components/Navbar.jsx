@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getCurrentUser, logout, isAdmin } from "@/lib/auth";
 import { BookOpen, Search, User, Menu, LogOut } from "lucide-react";
+import AboutModal from "@/pages/AboutModel";
+import { Heart } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +19,16 @@ export default function Navbar() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const currentUser = getCurrentUser();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsModalOpen(true);
+    }, 500);
+
+    return () => clearTimeout(timer); 
+  }, []); 
 
 
   const handleLogout = () => {
@@ -77,10 +89,18 @@ useEffect(() => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
+           
+              <button 
+               onClick={() => setIsModalOpen(true)}
+                 className="p-2 hover:bg-gray-100 rounded-full transition"
+        >
+           <Link href="/" className="flex items-center">
               <BookOpen className="text-primary text-2xl mr-2" />
+          
               <span className="text-2xl font-bold text-foreground">ԳրքաՊտույտ</span>
+            
             </Link>
+              </button>
             <div className="hidden md:ml-8 md:flex md:space-x-8">
               <NavItems />
             </div>
@@ -118,6 +138,13 @@ useEffect(() => {
                   <DropdownMenuItem className="font-medium">
                     {currentUser.username} ({currentUser.role})
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={() => setLocation("/favorites")}>
+                    <Heart className="w-4 h-4 mr-2 text-red-500" />
+                    Հավանած գրքեր
+                  </DropdownMenuItem>
+
+
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" />
                     դուրս գալ
@@ -164,6 +191,11 @@ useEffect(() => {
           </div>
         </div>
       </div>
+      <AboutModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </nav>
+    
   );
 }

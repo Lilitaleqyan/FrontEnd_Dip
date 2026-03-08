@@ -4,9 +4,12 @@ import { getStoredBooks } from "@/lib/storage";
 import { Book, BookOpen, Headphones, Microscope, GraduationCap } from "lucide-react";
 import ChatWindow from "./ChatWindow";
 
+
 export default function Home() {
   const [allBooks, setAllBooks] = useState([]);
   const [featuredBooks, setFeaturedBooks] = useState([]);
+
+  
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -31,17 +34,23 @@ export default function Home() {
       category: "science"
     },
     {
-      name: "Ուսումնական",
-      count: allBooks.filter(b => b.category === "educational").length,
+      name: "Ինքնակենսագրություն",
+      count: allBooks.filter(b => b.category === "autobiography").length,
       icon: GraduationCap,
-      category: "educational"
+      category: "autobiography"
     },
     {
       name: "Աուդիոգրքեր",
       count: allBooks.filter(b => b.category === "audiobook").length,
       icon: Headphones,
       category: "audiobook"
-    }
+    },
+    {
+      name: "Դետեկտիվ",
+      count: allBooks.filter(b => b.category === "detective").length,
+      icon: GraduationCap,
+      category: "detective"
+    },
   ];
 
   return (
@@ -50,9 +59,7 @@ export default function Home() {
         <h1 className="text-5xl font-bold text-foreground mb-4">
           Բարի գալուստ ԳրքաՊտույտ
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Բացահայտեք գիտելիքների աշխարհը մեր ժամանակակից թվային գրադարանում
-        </p>
+
       </section>
 
       <div className="relative bg-gradient-to-r from-primary to-accent rounded-2xl overflow-hidden mb-16 shadow-xl">
@@ -75,18 +82,16 @@ export default function Home() {
                 Սկսել ընթերցանությունը
               </button>
             </Link>
-            <button className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg">
-              Ավելի շատ տեղեկություններ
-            </button>
+
           </div>
         </div>
       </div>
 
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
-          Հանրաճանաչ կատեգորիաներ
+       
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-5 md:grid-cols-5 gap-6">
           {categories.map((category) => {
             const IconComponent = category.icon;
             return (
@@ -120,21 +125,23 @@ export default function Home() {
             </button>
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {featuredBooks.map((book) => (
             <div 
               key={book.id} 
-              className="bg-card rounded-xl overflow-hidden shadow-md hover-lift border border-border"
+              className="bg-card rounded-xl overflow-hidden shadow-md hover-lift border border-border flex flex-col"
             >
               <img 
                 src={book.coverUrl} 
                 alt={`Գրքի շապիկ ${book.title}`}
                 className="w-full h-48 object-cover"
               />
-              <div className="p-4">
+
+              <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-semibold text-foreground mb-1 line-clamp-2">
                   {book.title}
                 </h3>
+
                 <p className="text-muted-foreground text-sm mb-2">
                   {book.author}
                 </p>
@@ -142,7 +149,8 @@ export default function Home() {
                 <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
                   {book.description}
                 </p>
-                <Link href={`/book/${book.id}`}>
+
+                <Link href={`/book/${book.id}`} className="mt-auto">
                   <button 
                     className={`w-full text-sm font-medium ${
                       book.category === "audiobook" 

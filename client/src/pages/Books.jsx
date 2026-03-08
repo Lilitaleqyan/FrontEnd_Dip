@@ -45,7 +45,6 @@ export default function Books() {
       switch (sortBy) {
         case "title": return a.title.localeCompare(b.title);
         case "author": return a.author.localeCompare(b.author);
-        case "rating": return b.rating - a.rating;
         case "date": return new Date(b.createdAt) - new Date(a.createdAt);
         default: return 0;
       }
@@ -56,20 +55,15 @@ export default function Books() {
   const startIndex = (currentPage - 1) * booksPerPage;
   const currentBooks = filteredSortedBooks.slice(startIndex, startIndex + booksPerPage);
 
-  const renderStars = (rating) =>
-    Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${i < Math.floor(rating) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
-      />
-    ));
+
 
   const categoryLabels = {
     all: "Բոլոր կատեգորիաները",
     fiction: "Գեղարվեստական",
     science: "Գիտական",
-    educational: "Ուսումնական",
-    audiobook: "Աուդիոգրքեր"
+    autobiography: "Ինքնակենսագրություն",
+    audiobook: "Աուդիոգրքեր",
+    detective: "Դետեկտիվ"
   };
 
   if (isLoading) return (
@@ -119,7 +113,6 @@ export default function Books() {
               <SelectItem value="title">Վերնագրով</SelectItem>
               <SelectItem value="author">Հեղինակով</SelectItem>
               <SelectItem value="date">Ավելացման ամսաթվով</SelectItem>
-              <SelectItem value="rating">Վարկանիշով</SelectItem>
             </SelectContent>
           </Select>
 
@@ -209,7 +202,8 @@ export default function Books() {
                 <span className={`inline-block text-xs px-2 py-1 rounded-full mb-2 ${
                   book.category === "fiction" ? "bg-primary/10 text-primary" :
                   book.category === "science" ? "bg-accent/10 text-accent" :
-                  book.category === "educational" ? "bg-primary/10 text-primary" :
+                  book.category === "autobiography" ? "bg-primary/10 text-primary" :
+                  book.category === "detective" ? "bg-primary/10 text-primary" :
                   "bg-accent/10 text-accent"
                 }`}>
                   {categoryLabels[book.category]}
@@ -219,17 +213,15 @@ export default function Books() {
                 <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{book.description}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="flex mr-2">{renderStars(book.rating)}</div>
-                    <span className="text-xs text-muted-foreground">{book.rating ? book.rating : "0.0"}</span>
-                  </div>
+                </div>
                   <Link href={`/book/${book.id}`}>
                   
                     <Button variant="link" className="text-primary hover:text-primary/80 text-sm font-medium p-0">
                       Մանրամասն
                     </Button>
+                  
                   </Link>
-                </div>
-             <Button 
+   <Button 
                  
                 variant="outline" 
                 className="flex items-center gap-2" 
@@ -238,7 +230,8 @@ export default function Books() {
               >
                 <Download className="w-5 h-5" /> Ներբեռնել
               </Button>
-
+                </div>
+          
               </div>
             </div>
           ))}
