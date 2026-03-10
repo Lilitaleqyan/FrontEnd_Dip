@@ -3,7 +3,7 @@ import { downloadBook, addComments, viewAllComments } from "@/lib/storage";
 import { useRoute, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getBookById, reservBook } from "@/lib/storage";
+import { getBookById, reservBook, getBookReservedDates } from "@/lib/storage";
 import { getCurrentUser } from "@/lib/auth";
 import { Textarea } from "@/components/ui/textarea";
 import { 
@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { set } from "date-fns";
 import { is } from "drizzle-orm";
-
+import { Calendar } from "@/components/ui/calendar";
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
 
@@ -32,12 +32,14 @@ export default function BookDetail() {
   const [fontSize, setFontSize] = useState("medium");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
- 
+  const [reservedDates, setReservedDates] = useState([])
   const totalPages = book?.pages || 1;
   const progress = ((currentPage / totalPages) * 100);
+  const [selectedDate, setSelectedDate]  = useState(null)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
  
 
-useEffect(() => {
+useEffect(() => { 
   if (params?.id) {
     const token = localStorage.getItem("jwt_token");
 
@@ -66,11 +68,26 @@ useEffect(() => {
 
 useEffect(() => {
   if (params?.id) {
-    async function fetchBook() {
+    async function fetchBookData() {
       const foundBook = await getBookById(Number(params.id));
       setBook(foundBook);
+      
+      const dates = await getBookReservedDates(foundBook.id);
+      
+      const formattedDates = dates.map(range => {
+        const from = new Date(range.from);
+        const to = new Date(range.to);
+        
+        from.setHours(0, 0, 0, 0);
+        to.setHours(23, 59, 59, 999);
+        
+        return { from, to };
+      });
+
+      console.log("Formatted Reserved Dates:", formattedDates);
+      setReservedDates(formattedDates);
     }
-    fetchBook();
+    fetchBookData();
   }
 }, [params?.id]);
 
@@ -113,16 +130,34 @@ useEffect(() => {
     large: "text-lg"
   };
 
+
+  const handleReserveClick = () => {
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    toast({ 
+      title: "Սխալ", 
+      description: "Խնդրում ենք մուտք գործել նախքան գիրքը ամրագրելը", 
+      variant: "destructive" 
+    });
+    return;
+  }
+   setIsCalendarOpen(true);
+};
+
   const handleReserve = async () => {
      const currentUser = getCurrentUser(); 
      const readerId = currentUser?.id; 
      const storedUser = localStorage.getItem("library_current_user"); 
      const jwtToken = localStorage.getItem("jwt_token"); 
-     console.log("Stored user from localStorage:", storedUser);
-      console.log("JWT token exists:", !!jwtToken); 
-      console.log("Current user from getCurrentUser():", currentUser); 
-      console.log("Reader ID:", readerId); if (!readerId && jwtToken) 
-        { try { const [, payloadBase64] = jwtToken.split("."); 
+
+       if (!selectedDate) {
+          toast({ title: "Սխալ", 
+          description: "Խնդրում ենք ընտրել ամսաթիվ", 
+          variant: "destructive" });
+       return;
+  }
+        { try {
+          const [, payloadBase64] = jwtToken.split("."); 
           const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/"); 
           const json = atob(normalized); const payload = JSON.parse(json); 
           console.log("JWT payload:", payload); 
@@ -134,12 +169,18 @@ useEffect(() => {
                 toast({ title: "Սխալ", 
                   description: "Խնդրում ենք մուտք գործել նախքան գիրքը ամրագրելը", 
                   variant: "destructive", });
-           return; } 
+               return; 
+          } 
+
+
            try { 
-            await reservBook(book.id, readerId);
+            await reservBook(book.id, readerId, selectedDate.toISOString());
              toast({
                title: "Գիրքը ամրագրվել է", 
-               description: "Գիրքը հաջողությամբ ամրագրվել է", }); } 
+               description: "Գիրքը հաջողությամբ ամրագրվել է", }); 
+               setIsCalendarOpen(false);
+               setSelectedDate(null);
+             }
                catch (error) 
                { console.error("Reserve error:", error);
                  const errorMessage = error.message || "Չհաջողվեց ամրագրել գիրքը"; 
@@ -242,7 +283,7 @@ const toggleLike = async () => {
             className="flex items-center gap-2 rounded-full px-4">
           <Heart className={`w-4 h-4 ${isLiked ? "fill-white" : ""}`} />
             {isLiked ? "Հավանած է" : "Հավանել"}
-</Button>
+          </Button>
 
           </div>
           
@@ -269,17 +310,18 @@ const toggleLike = async () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-          <Button
-                className="flex-1"
-                size="lg"
-                onClick={handleReserve}
-                data-testid="button-reserve"
-              >
-                <BookOpen className="w-5 h-5 mr-2" />
-                Ամրագրել
-              </Button>
-              <Button 
-                 
+            <Button
+              className="flex-1"
+              size="lg"
+              onClick={handleReserveClick}
+              data-testid="button-reserve"
+            >
+              <BookOpen className="w-5 h-5 mr-2" />
+              Ամրագրել հիմա
+            </Button>
+
+
+              <Button      
                 variant="outline" 
                 className="flex items-center gap-2" 
                 size="sm"
@@ -289,6 +331,58 @@ const toggleLike = async () => {
               </Button>
 
           </div>
+          <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <DialogContent className="sm:max-w-[400px] flex flex-col items-center   
+              bg-gradient-to-r from-red-200 to-blue-200">
+                <DialogHeader>
+                 <DialogTitle>Ընտրեք վերադարձի օրը</DialogTitle>
+                </DialogHeader>
+
+        <div className="py-4">
+  <Calendar
+  mode="single"
+  selected={selectedDate}
+  onSelect={setSelectedDate}
+  disabled={{ before: new Date() }} 
+  modifiers={{
+    booked: reservedDates
+  }}
+  modifiersClassNames={{
+  
+    booked: `
+       !border-2 !border-red-00 !text-red-500 
+      !bg-transparent !font-bold
+      !bg-gradient-to-br !from-rose-100 !to-red-400 
+      !text-white !font-medium !opacity-100 
+      rounded-md shadow-sm transition-all
+      hover:!from-rose-500 hover:!to-red-100
+      cursor-not-allowed
+    `,
+  }}
+  
+  onDayClick={(day, modifiers) => {
+    if (modifiers.booked) return; 
+    setSelectedDate(day);
+  }}
+  className="rounded-xl border shadow-2xl p-4 bg-white"
+/>
+            </div>
+
+            {selectedDate && (
+              <p className="text-sm text-muted-foreground mb-4">
+                Վերադարձի օր՝ <strong>{selectedDate.toLocaleDateString('hy-AM')}</strong>
+              </p>
+            )}
+
+              <Button 
+                className="w-full" 
+                onClick={handleReserve}
+                disabled={!selectedDate}
+              >
+                Հաստատել ամրագրումը
+              </Button>
+            </DialogContent>
+          </Dialog>
            <div className="space-y-4 bg-muted p-4 rounded-b-lg">
                 <Textarea
                   placeholder="Գրեք ձեր մեկնաբանությունը…"

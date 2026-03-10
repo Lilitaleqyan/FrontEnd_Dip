@@ -244,6 +244,17 @@ export async function reservBook(bookId, readerId) {
 
 }
 
+export const getBookReservedDates = async (bookId) => {
+  try {
+    const response = await fetch(`${API_URL}/reader/${bookId}/reserved-dates`);
+    if (!response.ok) throw new Error("Չհաջողվեց ստանալ ամրագրված օրերը");
+    return await response.json(); 
+  } catch (error) {
+    console.error(error);
+    return []; 
+  }
+};
+
 export async function returnBook(reservationId)  
 {
     const token = localStorage.getItem("jwt_token");
