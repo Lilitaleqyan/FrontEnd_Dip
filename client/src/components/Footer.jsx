@@ -47,15 +47,18 @@ const sendMessage = async (e) => {
               Ժամանակակից թվային գրադարան բոլոր ընթերցասերների համար։
             </p>
             <div className="flex space-x-4">
+              <a href="https://www.facebook.com/" target="_blank">
               <Button variant="ghost" size="sm">
                 <Facebook className="h-5 w-5" />
-              </Button>
+              </Button></a> 
+              <a href="https://x.com/" target="_blank">
               <Button variant="ghost" size="sm">
                 <Twitter className="h-5 w-5" />
-              </Button>
+              </Button></a>
+              <a href="https://www.instagram.com/" target="_blank">
               <Button variant="ghost" size="sm">
                 <Instagram className="h-5 w-5" />
-              </Button>
+              </Button></a>
             </div>
           </div>
 

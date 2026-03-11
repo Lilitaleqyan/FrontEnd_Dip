@@ -3,9 +3,9 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getCurrentUser, logout, isAdmin } from "@/lib/auth";
-import { BookOpen, Search, User, Menu, LogOut } from "lucide-react";
+import { BookOpen, Search, User, Menu, LogOut, BookA } from "lucide-react";
 import AboutModal from "@/pages/AboutModel";
-import { Heart } from "lucide-react";
+import { Heart, History } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -140,8 +140,13 @@ useEffect(() => {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem onClick={() => setLocation("/favorites")}>
-                    <Heart className="w-4 h-4 mr-2 text-red-500" />
+                    <Heart className="w-4 h-4 mr-2 text-green-500" />
                     Հավանած գրքեր
+                  </DropdownMenuItem>
+                
+                  <DropdownMenuItem onClick={() => setLocation("/reserved")}>
+                   <History className="h-6 w-6 text-primary" />
+                   Ամրագրված գրքեր
                   </DropdownMenuItem>
 
 

@@ -57,7 +57,7 @@ export default function Home() {
     <div className="container mx-auto px-4 py-8 space-y-16 fade-in">
       <section className="text-center mb-12">
         <h1 className="text-5xl font-bold text-foreground mb-4">
-          Բարի գալուստ ԳրքաՊտույտ
+          Գրքապտույտ Գիտական Գրադարան
         </h1>
 
       </section>
@@ -71,16 +71,15 @@ export default function Home() {
         />
         <div className="relative px-8 py-16 md:py-24 text-center">
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Կարդացեք առանց սահմանների
+            Ակադեմիական գիտելիքի շտեմարան
           </h2>
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
-            {allBooks.length}-ից ավելի գրքեր, աուդիոգրքեր և գիտական հրապարակումներ մեկ վայրում
-          </p>
+              Ակադեմիական ռեսուրսների և մասնագիտական գրականության թվային հարթակ </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/books">
               <button className="bg-white text-primary hover:bg-white/90 shadow-lg px-8 py-4 text-lg">
-                Սկսել ընթերցանությունը
-              </button>
+                          Բացել գրադարանը
+                  </button>
             </Link>
 
           </div>

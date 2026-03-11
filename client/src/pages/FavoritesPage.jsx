@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Grid, List, Star, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { Search, Grid, List, Star, ChevronLeft, ChevronRight, Download, Heart } from "lucide-react";
 import { getBooks } from "@/lib/api";
 const API_URL = import.meta.env.VITE_API_BASE_URL; 
 
@@ -93,7 +93,7 @@ useEffect(() => {
   return (
     <div className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
-        Իմ հավանած գրքերը <span className="text-red-500">❤️</span>
+        Իմ հավանած գրքերը   <Heart className="w-10 h-10 mr-2 text-green-500 " />
       </h1>
 
       {favorites.length === 0 ? (

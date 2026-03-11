@@ -333,7 +333,7 @@ const toggleLike = async () => {
           </div>
           <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <DialogContent className="sm:max-w-[400px] flex flex-col items-center   
-              bg-gradient-to-r from-red-200 to-blue-200">
+              bg-gradient-to-r from-green-300 to-blue-300">
                 <DialogHeader>
                  <DialogTitle>Ընտրեք վերադարձի օրը</DialogTitle>
                 </DialogHeader>

@@ -19,6 +19,7 @@ import User from "./pages/User";
 import NotFound from "@/pages/not-found";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import FavoritesPage from "./pages/FavoritesPage"
+import ReservedBooks from "./pages/ReservedBooks";
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const user = getCurrentUser();
@@ -74,6 +75,14 @@ function Router() {
         <ProtectedRoute>
           <Navbar />
           <FavoritesPage />
+          <Footer />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/reserved">
+        <ProtectedRoute>
+          <Navbar />
+          <ReservedBooks />
           <Footer />
         </ProtectedRoute>
       </Route>
