@@ -45,7 +45,7 @@ export default function Admin() {
     coverUrl: "",
     filePath: null,
     fileType:"",
-    category: "fiction",
+    category: "mathematics",
     content: "",
     audioUrl: "",
     duration: "",
@@ -338,7 +338,7 @@ useEffect(() => {
       fileType: "",
       filePath: null,
       coverUrl: "",
-      category: "fiction",
+      category: "mathematics",
       content: "",
       audioUrl: "",
       duration: "",
@@ -351,11 +351,28 @@ useEffect(() => {
 
   const categoryLabels = {
     all: "Բոլոր կատեգորիաները",
-    fiction: "Գեղարվեստական",
-    science: "Գիտական",
-    autobiography: "Ինքնակենսագրություն",
-    audiobook: "Աուդիոգրքեր",
-    detective: "Դետեկտիվ"
+    mathematics: "Մաթեմատիկա",
+    physics: "Ֆիզիկա",
+    chemistry: "Քիմիա",
+    biology: "Կենսաբանություն",
+    astronomy: "Աստղագիտություն",
+    informatics: "Ինֆորմատիկա",
+    programming: "Ծրագրավորում",
+    engineering: "Ճարտարագիտություն",
+    medicine: "Բժշկություն",
+    philosophy: "Փիլիսոփայություն",
+    psychology: "Հոգեբանություն",
+    history: "Պատմություն",
+    linguistics: "Լեզվաբանություն",
+    economics: "Տնտեսագիտություն",
+    law: "Իրավագիտություն",
+    political_science: "Քաղաքագիտություն",
+    sociology: "Սոցիոլոգիա",
+    education: "Կրթագիտություն",
+    geography: "Աշխարհագրություն",
+    ecology: "Էկոլոգիա",
+    audiobook: "Աուդիոգրքեր"
+   
   };
 
   const stats = {

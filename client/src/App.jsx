@@ -20,7 +20,8 @@ import NotFound from "@/pages/not-found";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import FavoritesPage from "./pages/FavoritesPage"
 import ReservedBooks from "./pages/ReservedBooks";
-
+import AboutModal from "./pages/AboutModel";
+import Category from "./pages/Category"
 function ProtectedRoute({ children, adminOnly = false }) {
   const user = getCurrentUser();
   if (!user) return <Redirect to="/login" />;
@@ -64,6 +65,14 @@ function Router() {
           <Footer />
         </ProtectedRoute>
       </Route>
+
+       <Route path="/category">
+        <ProtectedRoute>
+          <Navbar />
+          <Category/>
+          <Footer />
+        </ProtectedRoute>
+      </Route>
       <Route path="/admin">
         <ProtectedRoute adminOnly={true}>
           <Navbar />
@@ -83,6 +92,13 @@ function Router() {
         <ProtectedRoute>
           <Navbar />
           <ReservedBooks />
+          <Footer />
+        </ProtectedRoute>
+      </Route>
+     <Route path="/aboutus">
+        <ProtectedRoute>
+          <Navbar />
+          <AboutModal/>
           <Footer />
         </ProtectedRoute>
       </Route>

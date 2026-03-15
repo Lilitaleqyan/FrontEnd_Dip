@@ -1,46 +1,100 @@
-import React from 'react';
+import {useState} from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from '@/hooks/use-toast';
 
-export default function AboutModal({ isOpen, onClose }) {
-  if (!isOpen) return null;
 
+export default function AboutModal() {
+const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
+    const [file, setFile] = useState(null);
+  
+const sendMessage = async (e) => {
+  
+  e.preventDefault();
 
+       const fd = new FormData();
+fd.append(
+    "request",
+    new Blob(
+      [
+        JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+        }),
+      ],
+      { type: "application/json" }
+    )
+  );
+     if (formData.filePath instanceof File) {
+        fd.append("file", formData.filePath);
+     }else {
+    alert("Խնդրում ենք ընտրել PDF կամ DJVu ֆայլ:");
+     return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:8181/reader/sendBook`, {
+      method: "POST",
+      body: fd,
+      
+    });
+     
+     if (response.ok) {
+      toast.update(id, { 
+        render: " Գիրքը հաջողությամբ ուղարկվեց", 
+        type: "success", 
+        isLoading: false, 
+        autoClose: 3000 
+      });
+    } else {
+      toast.update(id, { 
+        render: "Սխալ սերվերի կողմից", 
+        type: "error", 
+        isLoading: false, 
+        autoClose: 3000 
+      });
+    }
+  } catch (error) {
+    console.error("Error sending message:", error);
+  }
+};
+ 
 
   return (
-    <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
+   
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-200"
-        onClick={(e) => e.stopPropagation()} 
-      >
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors"
-        >
-          
-        </button>
-
-        <h2 className="text-2xl font-bold text-blue-700 mb-4 flex items-center gap-2">
+        className="flex flex-col md:flex-row gap-8 m-12 max-w-1200px ">
+        <div className="flex-[2] bg-white rounded-2xl shadow-xl p-8  animate-in fade-in border-t-4 border-blue-700">
+        <h2 className="text-2xl font-bold text-blue-700 italic mb-4 flex items-center gap-2">
           📖 Գրքապտույտի Մասին
         </h2>
 
-     <div className="text-gray-700  max-h-64 overflow-y-auto pr-2 ">
+     <div className="text-gray-900 pr-2 ">
     <p className="mb-6 text-base leading-relaxed font-medium">
-     Բարի գալուստ <strong>Գրքապտույտ</strong>՝ գիտական մտքի կենտրոն: <br />
-     <strong>Գրքապտույտ</strong>-ը  մասնագիտացված գիտական գրադարան է, որի առաքելությունն է աջակցել 
-    կրթությանը, հետազոտական աշխատանքին և ակադեմիական մտքի զարգացմանը։ Մենք ստեղծել ենք այս հարթակը որպես կամուրջ՝ 
-    արժեքավոր գիտական գրականության և այն փնտրող անհատի միջև։</p>
-
-  <p className="text-base leading-relaxed">
-    Գիտելիքը արժեք է միայն այն ժամանակ, երբ այն հասանելի է։
-    Մենք ապահովում ենք ակադեմիական ռեսուրսների բաց և համակարգված մատչելիություն: <strong>Գրքապտույտ</strong>-ը հարթակ է,
-    որտեղ գիտելիքը ոչ միայն պահպանվում է, 
-    այլև շրջանառվում է՝ ստեղծելով նոր գաղափարներ և նպաստելով կրթական որակի բարձրացմանը։
-  </p>
-
-  <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-    <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
+     Բարի գալուստ Գրքապտույտ</p>
+     <p>«Գրքապտույտ» գիտական էլեկտրոնային գրադարանը ստեղծվել է ուսանողների,
+        դասախոսների, հետազոտողների և գիտությամբ հետաքրքրված բոլոր ընթերցողների համար։ Կայքի նպատակն է տրամադրել գիտական և ուսումնական
+        գրականություն, ապահովելով ակադեմիական ռեսուրսների բաց և համակարգված մատչելիություն:
+        Գրադարանում ներկայացված են տարբեր ոլորտների նյութեր՝ մասնագիտական գրքեր, ուսումնամեթոդական
+        ձեռնարկներ, գիտական հոդվածներ, մագիստրոսական թեզեր, կուրսային աշխատանքներ և հանրագիտարաններ։ Օգտվողները կարող են առցանց դիտել, որոնել և ներբեռնել անհրաժեշտ գրականությունը՝  ուսման,
+        գիտահետազոտական աշխատանքի իրականացման կամ ինքնակրթվելու նպատակով։ Գրադարանի հիմնական առաքելությունն է նպաստել կրթության և գիտության
+        զարգացմանը՝տրամադրելով ժամանակակից թվային ծառայություններ  և ապահովելով գիտական տեղեկատվության մատչելիություն լայն շրջանակների
+        համար։ Կայքում գործում են նաև լրացուցիչ ծառայություններ, որոնք հնարավորություն են տալիս օգտվողներին արագ գտնել անհրաժեշտ գրականությունը, կատարել
+        առցանց հարցումներ և իմանալ նոր հրապարակումների մասին։ Մեր նպատակն է ստեղծել ժամանակակից և հարմարավետ թվային միջավայր,
+        որտեղ յուրաքանչյուր օգտվող կարող է հեշտությամբ օգտվել գիտական և կրթական
+        տեղեկատվական աղբյուրներից։</p>
+        <p>
+       <strong> -  Գրքապտույտը հարթակ է,
+      որտեղ գիտելիքը ոչ միայն պահպանվում է, 
+      այլև շրջանառվում է՝ ստեղծելով նոր գաղափարներ և 
+      նպաստելով կրթական որակի բարձրացմանը։</strong>
+ 
+</p>
+  <div className="bg-blue-50/50 m-4 p-4 rounded-xl border border-blue-100">
+    <h3 className="text-lg font-semibold text-blue-700 mb-3 flex items-center gap-2">
       Ինչու՞ ընտրել մեզ 🤔
     </h3>
 
@@ -59,20 +113,76 @@ export default function AboutModal({ isOpen, onClose }) {
         </li>
       ))}
     </ul>
-  </div>
-
-  <p className="mt-6 text-sm font-medium text-blue-600 italic">
+        <p className="mt-6 text-sm font-medium text-blue-600 italic">
     Գրքապտույտ / Ակադեմիական գիտական շտեմարան
   </p>
-</div>
+  </div>
 
-        <button 
-          onClick={onClose}
-          className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition shadow-lg"
-        >
-          Լավ
-        </button>
-      </div>
+
+</div>
+  </div>
+  <div className="flex-[1] flex flex-col gap-10 ">
+      <div className="bg-white rounded-2xl shadow-xl p-10 animate-in fade-in border-t-4 border-blue-700">
+      <h3 className="font-bold text-blue-700 italic mb-2 ">ՕԳՏԱԿԱՐ ԾՐԱԳՐԵՐ</h3>
+      <a href="http://windjview.sourceforge.net/ru/" target="__blank" className="text-blue-600 text-sm cursor-pointer">Բեռնել DJVU </a><br />
+      <a href="https://get.adobe.com/ru/reader/" target="__blank" className="text-blue-600 text-sm cursor-pointer">Բեռնել PDF</a>
     </div>
+      <div className="bg-white rounded-2xl shadow-xl p-8 animate-in fade-in border-t-4 border-blue-700">
+      <h3 className="font-bold text-blue-700 mb-2 italic p-top-4">Գրքաֆոնդի համալրում</h3>
+      <p className="text-sm">Նվիրաբերեք գրքեր մեր գրադարանին</p>
+         <form className="space-y-4 mt-4">
+              <div>
+                <Label>Անուն</Label>
+                <Input
+                  value={formData.firstName}  
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label>Ազգանուն</Label>
+                <Input
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label>էլ֊հասցե</Label>
+                 <Input
+                 type = "email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required />
+              </div>
+
+                <div>
+        <Label>Գրքի ֆայլ (PDF, EPUB, DJVU և այլն)</Label>
+        <Input
+        className="cursor-pointer"
+          type="file"
+          accept=".pdf,.epub, .djvu"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              setFormData({
+                ...formData,
+                filePath: file, 
+                fileType: file.name.substring(file.name.lastIndexOf(".") + 1)
+              });
+            }
+          }}
+        />
+      </div>
+              <div className="flex justify-end gap-4 ">
+                <Button className="bg-blue-700" onClick = {sendMessage} type="submit">{"Ուղարկել"}</Button>
+              </div>
+            </form>
+      </div>
+      </div>
+      </div>
+   
   );
 }

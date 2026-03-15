@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getCurrentUser, logout, isAdmin } from "@/lib/auth";
 import { BookOpen, Search, User, Menu, LogOut, BookA } from "lucide-react";
-import AboutModal from "@/pages/AboutModel";
+
 import { Heart, History } from "lucide-react";
 import {
   DropdownMenu,
@@ -73,6 +73,19 @@ useEffect(() => {
       >
         Աուդիոգրքեր
       </Link>
+
+      <Link
+        href="/category"
+        className="text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium"
+      >
+        Բաժիններ
+      </Link>
+      <Link
+        href="/aboutus"
+        className="text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium"
+      >
+        Մեր մասին
+      </Link>
       {isAdminUser && (
         <Link
           href="/admin"
@@ -87,21 +100,16 @@ useEffect(() => {
   return (
     <nav className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-24">
           <div className="flex items-center">
            
-              <button 
-               onClick={() => setIsModalOpen(true)}
-                 className="p-2 hover:bg-gray-100 rounded-full transition"
-        >
            <Link href="/" className="flex items-center">
               <BookOpen className="text-primary text-2xl mr-2" />
           
               <span className="text-2xl font-bold text-foreground">ԳրքաՊտույտ</span>
             
             </Link>
-              </button>
-            <div className="hidden md:ml-8 md:flex md:space-x-8">
+            <div className="hidden md:ml-8 md:flex md:space-x-4">
               <NavItems />
             </div>
           </div>
@@ -196,10 +204,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
-      <AboutModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
+
     </nav>
     
   );

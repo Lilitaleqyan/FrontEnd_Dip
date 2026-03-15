@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { getStoredBooks } from "@/lib/storage";
-import { Book, BookOpen, Headphones, Microscope, GraduationCap } from "lucide-react";
+import { Book, BookOpen, Headphones, Microscope,ArrowRight, GraduationCap, Calculator, Atom, FlaskConical, Code,  } from "lucide-react";
 import ChatWindow from "./ChatWindow";
 
 
 export default function Home() {
   const [allBooks, setAllBooks] = useState([]);
   const [featuredBooks, setFeaturedBooks] = useState([]);
+   const [books, setBooks] = useState([]);
 
   
 
@@ -16,42 +17,37 @@ export default function Home() {
       const books = await getStoredBooks();
       setAllBooks(books || []);
       setFeaturedBooks((books || []).slice(0, 4));
+      
     };
     fetchBooks();
   }, []);
 
-  const categories = [
-    {
-      name: "Գեղարվեստական",
-      count: allBooks.filter(b => b.category === "fiction").length,
-      icon: Book,
-      category: "fiction"
-    },
-    {
-      name: "Գիտական", 
-      count: allBooks.filter(b => b.category === "science").length,
-      icon: Microscope,
-      category: "science"
-    },
-    {
-      name: "Ինքնակենսագրություն",
-      count: allBooks.filter(b => b.category === "autobiography").length,
-      icon: GraduationCap,
-      category: "autobiography"
-    },
-    {
-      name: "Աուդիոգրքեր",
-      count: allBooks.filter(b => b.category === "audiobook").length,
-      icon: Headphones,
-      category: "audiobook"
-    },
-    {
-      name: "Դետեկտիվ",
-      count: allBooks.filter(b => b.category === "detective").length,
-      icon: GraduationCap,
-      category: "detective"
-    },
-  ];
+ const categories = [
+ 
+  {
+    name: "Մաթեմատիկա",
+    count: allBooks.filter(b => b.category === "mathematics").length,
+    icon: Calculator,
+    category: "mathematics"
+  },
+  {
+    name: "Ֆիզիկա",
+    count: allBooks.filter(b => b.category === "physics").length,
+    icon: Atom,
+    category: "physics"
+  },
+ 
+
+  {
+    name: "Ծրագրավորում",
+    count: allBooks.filter(b => b.category === "programming").length,
+    icon: Code,
+    category: "programming"
+  },
+
+
+];
+
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-16 fade-in">
@@ -78,7 +74,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/books">
               <button className="bg-white text-primary hover:bg-white/90 shadow-lg px-8 py-4 text-lg">
-                          Բացել գրադարանը
+               Բացել գրադարանը
                   </button>
             </Link>
 
@@ -86,11 +82,10 @@ export default function Home() {
         </div>
       </div>
 
-      <section className="mb-16">
-        <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
-       
-        </h2>
-        <div className="grid grid-cols-5 md:grid-cols-5 gap-6">
+      <section className="mb-8">
+
+        <h2 className="text-3xl font-bold text-foreground mb-8 text-center"> </h2>
+        <div className="grid grid-cols-4 md:grid-cols-4 gap-6">
           {categories.map((category) => {
             const IconComponent = category.icon;
             return (
@@ -108,10 +103,22 @@ export default function Home() {
                     {category.count} գրքեր
                   </p>
                 </div>
+                
               </Link>
+              
             );
-          })}
-        </div>
+            
+            
+          }
+        )
+          } 
+             <Link href="/category" className="bg-card rounded-xl p-6 border border-border cursor-pointer flex justify-center items-center">     
+     
+          <ArrowRight className="text-primary" size={28} />
+      
+       </Link>
+      </div>
+     
       </section>
 
    

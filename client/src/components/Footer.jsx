@@ -70,20 +70,18 @@ const sendMessage = async (e) => {
               <li><a href="/audiobooks" className="text-muted-foreground hover:text-primary transition-colors">Աուդիոգրքեր</a></li>
             </ul>
           </div>
-{/* 
+
           <div>
             <h3 className="text-foreground font-semibold mb-4">Աջակցություն</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Օգնություն</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Կապ</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Օգտագործման կանոններ</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Գաղտնիություն</a></li>
+              <li><a href="/category" className="text-muted-foreground hover:text-primary transition-colors">Բաժիններ</a></li>
+              <li><a href="/aboutus" className="text-muted-foreground hover:text-primary transition-colors">Մեր մասին</a></li>
+              <li><a href="favorites" className="text-muted-foreground hover:text-primary transition-colors">Հավանած գրքեր</a></li>
             </ul>
-          </div> */}
+          </div>
 
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Բաժանորդագրություն</h3>
-            <p className="text-muted-foreground mb-4">Ստացեք ծանուցումներ նոր գրքերի մասին</p>
+            <h3 className="text-foreground font-semibold mb-4">Հետադարձ կապ</h3>
             <form onSubmit={sendMessage} className="flex">
               <Input
                 type="text"

@@ -14,7 +14,7 @@ const API_URL = import.meta.env.VITE_API_BASE_URL; // backend URL
 
 export default function Books() {
   const [location] = useLocation();
-  const [filters, setFilters] = useState({ title: "", author: "", category: "all" });
+  const [filters, setFilters] = useState({ title: "", author: "", category: "category" });
   const [sortBy, setSortBy] = useState("title");
   const [viewMode, setViewMode] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,11 +27,14 @@ export default function Books() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  
     setFilters(prev => ({
       ...prev,
       title: urlParams.get("search") || "",
       category: urlParams.get("category") || "all"
     }));
+
+    
   }, [location]);
 
   const filteredSortedBooks = booksData
@@ -59,11 +62,28 @@ export default function Books() {
 
   const categoryLabels = {
     all: "Բոլոր կատեգորիաները",
-    fiction: "Գեղարվեստական",
-    science: "Գիտական",
-    autobiography: "Ինքնակենսագրություն",
-    audiobook: "Աուդիոգրքեր",
-    detective: "Դետեկտիվ"
+    
+    mathematics: "Մաթեմատիկա",
+    physics: "Ֆիզիկա",
+    chemistry: "Քիմիա",
+    biology: "Կենսաբանություն",
+    astronomy: "Աստղագիտություն",
+    informatics: "Ինֆորմատիկա",
+    programming: "Ծրագրավորում",
+    engineering: "Ճարտարագիտություն",
+    medicine: "Բժշկություն",
+    philosophy: "Փիլիսոփայություն",
+    psychology: "Հոգեբանություն",
+    history: "Պատմություն",
+    linguistics: "Լեզվաբանություն",
+    economics: "Տնտեսագիտություն",
+    law: "Իրավագիտություն",
+    political_science: "Քաղաքագիտություն",
+    sociology: "Սոցիոլոգիա",
+    education: "Կրթագիտություն",
+    geography: "Աշխարհագրություն",
+    ecology: "Էկոլոգիա"
+
   };
 
   if (isLoading) return (
@@ -200,10 +220,10 @@ export default function Books() {
               />
               <div className={viewMode === "grid" ? "p-4" : "flex-1"}>
                 <span className={`inline-block text-xs px-2 py-1 rounded-full mb-2 ${
-                  book.category === "fiction" ? "bg-primary/10 text-primary" :
-                  book.category === "science" ? "bg-accent/10 text-accent" :
-                  book.category === "autobiography" ? "bg-primary/10 text-primary" :
-                  book.category === "detective" ? "bg-primary/10 text-primary" :
+                  book.category === "mathematics" ? "bg-primary/10 text-primary" :
+                  book.category === "physics" ? "bg-accent/10 text-accent" :
+                  book.category === "chemistry" ? "bg-primary/10 text-primary" :
+                  book.category === "biology" ? "bg-primary/10 text-primary" :
                   "bg-accent/10 text-accent"
                 }`}>
                   {categoryLabels[book.category]}
