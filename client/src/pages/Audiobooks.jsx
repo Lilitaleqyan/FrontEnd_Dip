@@ -43,7 +43,7 @@ export default function Audiobooks() {
     const fetchBooks = async () => {
       const allBooks = await getStoredBooks();
       const audiobookList = (allBooks || []).filter(
-        (book) => book.category === "audiobook"
+        (book) => book.isAudioBook == true
       );
       setAudiobooks(audiobookList);
       if (audiobookList.length > 0 && !currentlyPlaying) {

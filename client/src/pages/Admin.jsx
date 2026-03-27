@@ -46,7 +46,7 @@ export default function Admin() {
     filePath: null,
     fileType:"",
     category: "mathematics",
-    content: "",
+    isAudioBook: false,
     audioUrl: "",
     duration: "",
     narrator: "",
@@ -134,6 +134,7 @@ const handleSubmit = async (e) => {
       pages: formData.pages,
       coverUrl:formData.coverUrl,
       fileType: formData.fileType,
+      isAudioBook: formData.isAudioBook,
       // audioUrl: formData.audioUrl,
       narrator: formData.narrator,
       duration:formData.duration
@@ -155,7 +156,7 @@ const handleSubmit = async (e) => {
     
   }
 
-  if (formData.audioFile instanceof File) {
+  if (formData.isAudioBook &&formData.audioFile instanceof File) {
   fd.append("audioFile", formData.audioFile, formData.audioFile.name);
     // headers: { 'Content-Type': 'audio/mpeg' } 
   
@@ -205,6 +206,7 @@ const handleSubmit = async (e) => {
     coverUrl: book.coverUrl,
     category: book.category,
     content: book.content || "",
+    isAudioBook:book.isAudioBook || false,
     //  audioUrl: null,
     duration: book.duration || "",
     narrator: book.narrator || "",
@@ -368,7 +370,7 @@ useEffect(() => {
     law: "Իրավագիտություն",
     political_science: "Քաղաքագիտություն",
     sociology: "Սոցիոլոգիա",
-    education: "Կրթագիտություն",
+    psychology_of_war: "Ռազմական հոգեբանություն",
     geography: "Աշխարհագրություն",
     ecology: "Էկոլոգիա",
     audiobook: "Աուդիոգրքեր"
@@ -461,54 +463,58 @@ useEffect(() => {
                 </Select>
               </div>
 
-              {formData.category === "audiobook" && (
-                <>
-      <div>
-        <Label>Audio URL</Label>
-          <Input
-          type = "file"
-           accept="audio/"
-            onChange={(e) => {
-            const file = e.target.files[0];
-            if (file) {
-              setFormData({
-                ...formData,
-                audioFile: file, 
-              });
-            }
-          
-          }
-        }
-          ></Input>
-      </div>
-                  <div>
-                    <Label>Տևողություն</Label>
-                    <Input
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Նարատոր</Label>
-                    <Input
-                      value={formData.narrator}
-                      onChange={(e) => setFormData({ ...formData, narrator: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
+              <div className="flex items-center space-x-2 py-2">
+  <input
+    type="checkbox"
+    id="isAudioBook"
+    checked={formData.isAudioBook}
+    onChange={(e) => setFormData({ ...formData, isAudioBook: e.target.checked })}
+    className="w-4 h-4 mt-1"
+  />
+  <Label htmlFor="isAudioBook" className="cursor-pointer font-medium">
+    Սա աուդիոգիրք է
+  </Label>
+</div>
 
-              {formData.category !== "audiobook" && (
-                <div>
-                  <Label>Էջերի քանակը</Label>
-                  <Input
-                    type="number"
-                    value={formData.pages}
-                    onChange={(e) => setFormData({ ...formData, pages: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                
-              )}
+{formData.isAudioBook && (
+  <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-dashed">
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <Label>Տևողություն</Label>
+        <Input
+          placeholder="օր. 5ժ 20ր"
+          value={formData.duration}
+          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+        />
+      </div>
+      <div>
+        <Label>Նարատոր (Կարդացող)</Label>
+        <Input
+          placeholder="Անուն Ազգանուն"
+          value={formData.narrator}
+          onChange={(e) => setFormData({ ...formData, narrator: e.target.value })}
+        />
+      </div>
+    </div>
+    <div>
+      <Label>Աուդիո ֆայլ (MP3)</Label>
+      <Input
+        type="file"
+        accept="audio/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            setFormData({ ...formData, audioFile: file });
+          }
+        }}
+      />
+    </div>
+  </div>
+)}
+
+            
+
+            
                 <div>
         <Label>Գրքի ֆայլ (PDF, EPUB և այլն)</Label>
         <Input

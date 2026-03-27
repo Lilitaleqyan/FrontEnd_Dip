@@ -14,10 +14,18 @@ const API_URL = import.meta.env.VITE_API_BASE_URL; // backend URL
 
 export default function Books() {
   const [location] = useLocation();
-  const [filters, setFilters] = useState({ title: "", author: "", category: "category" });
   const [sortBy, setSortBy] = useState("title");
   const [viewMode, setViewMode] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = new URLSearchParams(window.location.search);
+  const categoryFromUrl = searchParams.get('category') || "all";
+  const searchQueryFromUrl = searchParams.get('search') || "";
+  const [filters, setFilters] = useState({ 
+    title: searchQueryFromUrl, 
+    author: "", 
+    category: categoryFromUrl 
+  });
+
   const booksPerPage = 12;
 
   const { data: booksData = [], isLoading, error } = useQuery({
@@ -26,16 +34,17 @@ export default function Books() {
   });
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.split("?")[1] || "");
-  
-    setFilters(prev => ({
+          const params = new URLSearchParams(window.location.search);
+          const urlCat = params.get("category") || "all";
+           const urlSearch = params.get("search") || "";  
+  setFilters(prev => ({
       ...prev,
-      title: urlParams.get("search") || "",
-      category: urlParams.get("category") || "all"
+      category: urlCat,
+      title: urlSearch
     }));
-
-    
-  }, [location]);
+    setCurrentPage(1); 
+  }, [window.location.search]);
+  
 
   const filteredSortedBooks = booksData
     .filter(book => {
@@ -45,14 +54,19 @@ export default function Books() {
       return matchTitle && matchAuthor && matchCategory;
     })
     .sort((a, b) => {
-      switch (sortBy) {
-        case "title": return a.title.localeCompare(b.title);
-        case "author": return a.author.localeCompare(b.author);
-        case "date": return new Date(b.createdAt) - new Date(a.createdAt);
-        default: return 0;
-      }
+      if (sortBy === "title") return a.title.localeCompare(b.title);
+      if (sortBy === "author") return a.author.localeCompare(b.author);
+      if (sortBy === "date") return new Date(b.createdAt) - new Date(a.createdAt);
+      return 0;
     });
 
+
+    const handleCategoryChange = (value) => {
+    setFilters({ ...filters, category: value });
+    const newPath = value === "all" ? "/books" : `/books?category=${value}`;
+    window.history.pushState({}, '', newPath);
+    setCurrentPage(1);
+  };
 
   const totalPages = Math.ceil(filteredSortedBooks.length / booksPerPage);
   const startIndex = (currentPage - 1) * booksPerPage;
@@ -76,11 +90,12 @@ export default function Books() {
     psychology: "Հոգեբանություն",
     history: "Պատմություն",
     linguistics: "Լեզվաբանություն",
+    //"Գրականություն"
     economics: "Տնտեսագիտություն",
     law: "Իրավագիտություն",
     political_science: "Քաղաքագիտություն",
     sociology: "Սոցիոլոգիա",
-    education: "Կրթագիտություն",
+    psychology_of_war: "Ռազմական հոգեբանություն",
     geography: "Աշխարհագրություն",
     ecology: "Էկոլոգիա"
 
