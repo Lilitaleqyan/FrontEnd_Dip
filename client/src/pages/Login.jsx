@@ -182,7 +182,7 @@ const handleLogout = () => {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2">
                       <Checkbox
                         id="remember"
                         checked={formData.rememberMe}
@@ -191,7 +191,7 @@ const handleLogout = () => {
                         }
                       />
                       <Label htmlFor="remember">Հիշել ինձ</Label>
-                    </div>
+                    </div> */}
 
                     <Button
                     type = "button"

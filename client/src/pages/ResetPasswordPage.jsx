@@ -35,7 +35,7 @@ return (
       className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl space-y-5"
     >
       <h2 className="text-2xl font-bold text-center text-gray-800">
-        Reset Password
+        Վերականգնել գաղտնաբառը
       </h2>
 
       {error && (
@@ -49,7 +49,7 @@ return (
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter new password"
+          placeholder="Մուտքագրիր նոր գաղտնաբառ"
           required
           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
         />
@@ -59,7 +59,7 @@ return (
         type="submit"
         className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 active:scale-[0.98] transition duration-200 shadow-md"
       >
-        Change Password
+        Փոխել գաղտնաբառը
       </button>
     </form>
   </div>

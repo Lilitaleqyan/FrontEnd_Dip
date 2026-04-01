@@ -210,7 +210,7 @@ export default function Home() {
                         : "p-1 bg-primary text-primary-foreground hover:bg-primary/90"
                     }`}
                   >
-                    {book.category === "audiobook" ? "Լսել" : "Կարդալ"}
+                    {book.isAudioBook ? "Լսել" : "Կարդալ"}
                   </button>
                 </Link>
               </div>

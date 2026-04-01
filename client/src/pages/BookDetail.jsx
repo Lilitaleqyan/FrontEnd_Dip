@@ -116,12 +116,27 @@ useEffect(() => {
     ));
   };
 
-  const categoryLabels = {
-    fiction: "Գեղարվեստական",
-    science: "Գիտական",
-    autobiography: "Ինքնակենսագրություն",
-    audiobook: "Աուդիոգրքեր",
-    detective: "Դետեկտիվ"
+   const categoryLabels = {
+    all: "Բոլոր կատեգորիաները",
+    mathematics: "Մաթեմատիկա",
+    physics: "Ֆիզիկա",
+    chemistry: "Քիմիա",
+    biology: "Կենսաբանություն",
+    informatics: "Ինֆորմատիկա",
+    programming: "Ծրագրավորում",
+    engineering: "Ճարտարագիտություն",
+    medicine: "Բժշկություն",
+    philosophy: "Փիլիսոփայություն",
+    psychology: "Հոգեբանություն",
+    history: "Պատմություն",
+    linguistics: "Լեզվաբանություն",
+    economics: "Տնտեսագիտություն",
+    law: "Իրավագիտություն",
+    political_science: "Քաղաքագիտություն",
+    sociology: "Սոցիոլոգիա",
+    psychology_of_war: "Ռազմական հոգեբանություն",
+    geography: "Աշխարհագրություն",
+    ecology: "Էկոլոգիա"
   };
 
   const fontSizeClasses = {

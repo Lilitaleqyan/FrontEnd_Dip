@@ -76,12 +76,7 @@ const categories = [
     icon: Microscope,
     category: "biology"
   },
-  {
-    name: "Աստղագիտություն",
-    count: allBooks.filter(b => b.category === "astronomy").length,
-    icon: Telescope,
-    category: "astronomy"
-  },
+
   {
     name: "Ինֆորմատիկա",
     count: allBooks.filter(b => b.category === "informatics").length,

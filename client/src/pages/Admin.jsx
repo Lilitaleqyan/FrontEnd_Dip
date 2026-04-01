@@ -34,7 +34,8 @@ export default function Admin() {
   const [loadingReaders, setLoadingReaders] = useState(false); 
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const
+   [selectedCategory, setSelectedCategory] = useState("all")
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
@@ -52,6 +53,7 @@ export default function Admin() {
     narrator: "",
     pages: 0
 });
+
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -135,20 +137,10 @@ const handleSubmit = async (e) => {
       coverUrl:formData.coverUrl,
       fileType: formData.fileType,
       isAudioBook: formData.isAudioBook,
-      // audioUrl: formData.audioUrl,
       narrator: formData.narrator,
       duration:formData.duration
     })], { type:"application/json" })
   );
-
-  // console.log(JSON.stringify({
-  //     title: formData.title,
-  //     author: formData.author,
-  //     description: formData.description,
-  //     category: formData.category,
-  //     pages: formData.pages,
-  //     fileType: formData.fileType
-  //   }), { type:"application/json" })
   
 
   if (formData.filePath instanceof File) {
@@ -157,18 +149,14 @@ const handleSubmit = async (e) => {
   }
 
   if (formData.isAudioBook &&formData.audioFile instanceof File) {
-  fd.append("audioFile", formData.audioFile, formData.audioFile.name);
-    // headers: { 'Content-Type': 'audio/mpeg' } 
-  
+  fd.append("audioFile", formData.audioFile, formData.audioFile.name);  
  
 }
-//  concole.log(formData.)
   for (let pair of fd.entries()) {
     console.log(pair[0], pair[1]);
   }
   try {
     if (editingBook) {
-      // console.log(editingBook.id)
       await editBook(editingBook.id, fd);
       toast({
         title: "Գիրքը թարմացվել է",
@@ -357,7 +345,6 @@ useEffect(() => {
     physics: "Ֆիզիկա",
     chemistry: "Քիմիա",
     biology: "Կենսաբանություն",
-    astronomy: "Աստղագիտություն",
     informatics: "Ինֆորմատիկա",
     programming: "Ծրագրավորում",
     engineering: "Ճարտարագիտություն",
@@ -372,9 +359,7 @@ useEffect(() => {
     sociology: "Սոցիոլոգիա",
     psychology_of_war: "Ռազմական հոգեբանություն",
     geography: "Աշխարհագրություն",
-    ecology: "Էկոլոգիա",
-    audiobook: "Աուդիոգրքեր"
-   
+    ecology: "Էկոլոգիա"
   };
 
   const stats = {
@@ -462,6 +447,15 @@ useEffect(() => {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>Էջերի քանակ</Label><br />
+                <input
+                  value={formData.pages}
+                  onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
+                  type="Number"
+                  required
+                />
+              </div>
 
               <div className="flex items-center space-x-2 py-2">
   <input
@@ -513,8 +507,6 @@ useEffect(() => {
 )}
 
             
-
-            
                 <div>
         <Label>Գրքի ֆայլ (PDF, EPUB և այլն)</Label>
         <Input
@@ -543,9 +535,7 @@ useEffect(() => {
         </Dialog>
       </div>
 
-      
     
-
       
       <Card>
         <CardHeader>
