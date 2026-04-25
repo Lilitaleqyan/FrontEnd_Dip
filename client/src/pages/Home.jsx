@@ -100,13 +100,11 @@ export default function Home() {
   </div>
 </div>
     <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-tight drop-shadow-2xl">
-     <span className="text-blue-400"> Ակադեմիական  </span> գիտելիքի շտեմարան <br />
+     <span className="text-blue-400"> Մասնագիտական  </span>  գրականության թվային հարթակ  <br />
     
     </h2>
 
-    <p className="text-lg md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
-        Ակադեմիական ռեսուրսների և մասնագիտական գրականության թվային հարթակ    
-         </p>
+
 
     <div className="flex flex-col sm:flex-row gap-6 justify-center">
       <Link href="/books">
@@ -170,7 +168,7 @@ export default function Home() {
    
       <section className="mb-16">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-foreground">Նորավել</h2>
+          <h2 className="text-2xl font-bold text-foreground"></h2>
           <Link href="/books">
             <button className="text-primary hover:underline font-medium">
               Ավելին

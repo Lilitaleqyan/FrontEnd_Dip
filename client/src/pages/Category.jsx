@@ -266,7 +266,7 @@ return (
             <a href="https://get.adobe.com/ru/reader/" target="__blank" className="text-blue-600 text-sm cursor-pointer">Բեռնել PDF</a>
           </div>
             <div className="bg-white rounded-2xl shadow-xl p-8 animate-in fade-in border-t-4 border-blue-700">
-            <h3 className="font-bold text-blue-700 mb-2 italic p-top-4">Գրքաֆոնդի համալրում</h3>
+            <h3 className="font-bold text-blue-700 mb-2 italic p-top-4">Գրքերի ֆոնդի համալրում</h3>
             <p className="text-sm">Նվիրաբերեք գրքեր մեր գրադարանին</p>
                <form className="space-y-4 mt-4 " onSubmit={sendMessage}>
                     <div>

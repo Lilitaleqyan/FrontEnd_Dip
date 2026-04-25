@@ -255,7 +255,7 @@ const toggleLike = async () => {
     if (response.ok) {
       setIsLiked(!isLiked);
       toast({
-        title: isLiked ? "Հեռացվեց հավանածներից" : "Ավելացվեց հավանածների մեջ",
+        title: isLiked ? "Հեռացվեց հավանածների ցանկից" : "Ավելացվեց հավանածների ցանկում",
         variant: "default",
       });
     }

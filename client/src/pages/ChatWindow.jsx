@@ -33,10 +33,10 @@ export default function ChatWindow() {
       });
 
       const data = await res.json();
-      const aiResponse = data.reply || "Ներողություն, սխալ տեղի ունեցավ:";
+      const aiResponse = data.reply || "Ներողություն, տեղի ունեցավ սխալ:";
       setChatLog((prev) => [...prev, { sender: "AI", text: aiResponse }]);
     } catch (err) {
-      setChatLog((prev) => [...prev, { sender: "AI", text: "Կապի սխալ: Համոզվեք, որ սերվերը միացված է:" }]);
+      setChatLog((prev) => [...prev, { sender: "AI", text: "Կապը խափանվեց" }]);
     } finally {
       setLoading(false);
     }

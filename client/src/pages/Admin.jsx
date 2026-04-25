@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,19 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { getStoredBooks, createBook, deleteBook, editBook, getAllReaders, deleteReader, getReservedBooks, getReturnedBook, returnBook  } from "@/lib/storage";
+import { getStoredBooks, createBook, deleteBook, editBook, getAllReaders, deleteReader, getReservedBooks, getReturnedBook, returnBook } from "@/lib/storage";
 import { isAdmin } from "@/lib/auth";
 import { Plus, Search, Edit, Eye, Trash2, BookOpen, Users, Download, Headphones, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { set } from "date-fns";
 import { Check } from "lucide-react";
+import { getBooks } from "@/lib/api";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 
 
 const API_URL = import.meta.env.VITE_API_BASE_URL; // backend-ի URL
 
 
 export default function Admin() {
-  const [modalType, setModalType] = useState("RESERVED"); 
+  const [modalType, setModalType] = useState("RESERVED");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [reservedBooks, setReservedBooks] = useState([]);
@@ -31,29 +34,62 @@ export default function Admin() {
   const [selectedReader, setSelectedReader] = useState(null);
   const [books, setBooks] = useState([]);
   const [readers, setReaders] = useState([]);
-  const [loadingReaders, setLoadingReaders] = useState(false); 
+  const [sortBy, setSortBy] = useState("title");
+  const [loadingReaders, setLoadingReaders] = useState(false);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1)
+  const searchParams = new URLSearchParams(window.location.search);
+  const categoryFromUrl = searchParams.get('category') || "all";
+  const searchQueryFromUrl = searchParams.get('search') || "";
+  const [filters, setFilters] = useState({
+    title: searchQueryFromUrl,
+    author: "",
+    category: categoryFromUrl
+  });
   const
-   [selectedCategory, setSelectedCategory] = useState("all")
+    [selectedCategory, setSelectedCategory] = useState("all")
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
-  const [formData, setFormData] = useState( {
-    title: "", 
+  const [formData, setFormData] = useState({
+    title: "",
     author: "",
     description: "",
     coverUrl: "",
     filePath: null,
-    fileType:"",
+    fileType: "",
     category: "mathematics",
     isAudioBook: false,
     audioUrl: "",
     duration: "",
     narrator: "",
     pages: 0
-});
+  });
 
+  const booksPerPage = 12;
+  const { data: booksData = [], isLoading, error } = useQuery({
+    queryKey: ["books"],
+    queryFn: getBooks,
+  });
+
+  const filteredSortedBooks = booksData
+    .filter(book => {
+      const matchTitle = book.title.toLowerCase().includes(filters.title.toLowerCase());
+      const matchAuthor = book.author.toLowerCase().includes(filters.author.toLowerCase());
+      const matchCategory = filters.category === "all" || book.category === filters.category;
+      return matchTitle && matchAuthor && matchCategory;
+    })
+    .sort((a, b) => {
+      if (sortBy === "title") return a.title.localeCompare(b.title);
+      if (sortBy === "author") return a.author.localeCompare(b.author);
+      if (sortBy === "date") return new Date(b.createdAt) - new Date(a.createdAt);
+      return 0;
+    });
+
+  const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
+  const startIndex = (currentPage - 1) * booksPerPage;
+  const currentBooks = filteredBooks.slice(startIndex, startIndex + booksPerPage);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -64,42 +100,44 @@ export default function Admin() {
       }
     };
     checkAdmin();
-    ( async () => {
+    (async () => {
       try {
         await loadBooks();
         console.log(books)
       }
-      catch(err)
-      {
+      catch (err) {
         console.error("error loading books")
       }
-      
-    }) ()
+
+    })()
   }, []);
 
   useEffect(() => {
     filterBooks();
+    setCurrentPage(1)
   }, [books, searchQuery, selectedCategory]);
 
-   
+
   const loadBooks = async (allBooks) => {
     allBooks = await getStoredBooks();
     setBooks(allBooks || []);
     return allBooks;
   };
 
-const loadReaders = async () => {
-  try {
-    setLoadingReaders(true);
-    const data = await getAllReaders();
-    console.log("Readers data from backend:", data);
-    setReaders(data || []);
-  } catch (err) {
-    console.error("Error loading readers", err);
-  } finally {
-    setLoadingReaders(false);
-  }
-};
+
+
+  const loadReaders = async () => {
+    try {
+      setLoadingReaders(true);
+      const data = await getAllReaders();
+      console.log("Readers data from backend:", data);
+      setReaders(data || []);
+    } catch (err) {
+      console.error("Error loading readers", err);
+    } finally {
+      setLoadingReaders(false);
+    }
+  };
 
 
   useEffect(() => {
@@ -107,7 +145,7 @@ const loadReaders = async () => {
   }, []);
 
 
-    
+
   const filterBooks = () => {
     if (!Array.isArray(books)) return setFilteredBooks([]);
     let filtered = books;
@@ -123,88 +161,88 @@ const loadReaders = async () => {
     setFilteredBooks(filtered);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const fd = new FormData();
-   fd.append(
-    "book",
-    new Blob([JSON.stringify({
-      title: formData.title,
-      author: formData.author,
-      description: formData.description,
-      category: formData.category,
-      pages: formData.pages,
-      coverUrl:formData.coverUrl,
-      fileType: formData.fileType,
-      isAudioBook: formData.isAudioBook,
-      narrator: formData.narrator,
-      duration:formData.duration
-    })], { type:"application/json" })
-  );
-  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.append(
+      "book",
+      new Blob([JSON.stringify({
+        title: formData.title,
+        author: formData.author,
+        description: formData.description,
+        category: formData.category,
+        pages: formData.pages,
+        coverUrl: formData.coverUrl,
+        fileType: formData.fileType,
+        isAudioBook: formData.isAudioBook,
+        narrator: formData.narrator,
+        duration: formData.duration
+      })], { type: "application/json" })
+    );
 
-  if (formData.filePath instanceof File) {
-    fd.append("file", formData.filePath, formData.filePath.name);
-    
-  }
 
-  if (formData.isAudioBook &&formData.audioFile instanceof File) {
-  fd.append("audioFile", formData.audioFile, formData.audioFile.name);  
- 
-}
-  for (let pair of fd.entries()) {
-    console.log(pair[0], pair[1]);
-  }
-  try {
-    if (editingBook) {
-      await editBook(editingBook.id, fd);
+    if (formData.filePath instanceof File) {
+      fd.append("file", formData.filePath, formData.filePath.name);
+
+    }
+
+    if (formData.isAudioBook && formData.audioFile instanceof File) {
+      fd.append("audioFile", formData.audioFile, formData.audioFile.name);
+
+    }
+    for (let pair of fd.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+    try {
+      if (editingBook) {
+        await editBook(editingBook.id, fd);
+        toast({
+          title: "Գիրքը թարմացվել է",
+          description: "Գրքի տվյալները հաջողությամբ թարմացվել են",
+        });
+      } else {
+        await createBook(fd);
+        toast({
+          title: "Գիրքը ավելացվել է",
+          description: "Նոր գիրքը հաջողությամբ ավելացվել է գրադարանում",
+        });
+      }
+
+      await loadBooks();
+      resetForm();
+      setIsDialogOpen(false);
+
+    } catch (error) {
       toast({
-        title: "Գիրքը թարմացվել է",
-        description: "Գրքի տվյալները հաջողությամբ թարմացվել են",
+        title: "Սխալ",
+        description: "Չհաջողվեց պահպանել գիրքը",
+        variant: "destructive",
       });
-    } else {
-      await createBook(fd);
-      toast({
-        title: "Գիրքը ավելացվել է",
-        description: "Նոր գիրքը հաջողությամբ ավելացվել է գրադարան",
-      });
-  }
-
-   await loadBooks();
-    resetForm();
-    setIsDialogOpen(false);
-
-  } catch (error) {
-    toast({
-      title: "Սխալ",
-      description: "Չհաջողվեց պահպանել գիրքը",
-      variant: "destructive",
-    });
-  }
-};
+    }
+  };
 
   const handleEdit = (book) => {
 
     setEditingBook(book);
 
-  setFormData({
-    title: book.title,
-    author: book.author,
-    description: book.description,
-    coverUrl: book.coverUrl,
-    category: book.category,
-    content: book.content || "",
-    isAudioBook:book.isAudioBook || false,
-    //  audioUrl: null,
-    duration: book.duration || "",
-    narrator: book.narrator || "",
-    pages: book.pages || 0,
-    fileType: book.fileType || "",
-    filePath: null
-  });
+    setFormData({
+      title: book.title,
+      author: book.author,
+      description: book.description,
+      coverUrl: book.coverUrl,
+      category: book.category,
+      content: book.content || "",
+      isAudioBook: book.isAudioBook || false,
+      //  audioUrl: null,
+      duration: book.duration || "",
+      narrator: book.narrator || "",
+      pages: book.pages || 0,
+      fileType: book.fileType || "",
+      filePath: null
+    });
 
-  setIsDialogOpen(true);
-    
+    setIsDialogOpen(true);
+
   }
 
   const handleDelete = async (book) => {
@@ -228,11 +266,11 @@ const handleSubmit = async (e) => {
 
   const handleDeleteReader = async (reader) => {
     const readerId = reader.id || reader.userId || reader._id || reader.user_id || reader.ID;
-    
+
     if (!readerId) {
       toast({
         title: "Սխալ",
-        description: "Օգտատեր ID-ն չի գտնվել: Backend-ը պետք է վերադարձնի ID-ն getAllUsers response-ում",
+        description: "Օգտատերը չի գտնվել:",
         variant: "destructive",
       });
       console.error("Reader object:", reader);
@@ -248,79 +286,79 @@ const handleSubmit = async (e) => {
       try {
         await deleteReader(readerId);
         toast({
-          title: "Օգտատերը ջնջվել է",
+          title: "Օգտատերը հեռացվել է",
           description: "Օգտատերը հաջողությամբ հեռացվել է",
         });
         loadReaders();
       } catch {
         toast({
           title: "Սխալ",
-          description: "Չհաջողվեց ջնջել օգտատերին",
+          description: "Չհաջողվեց հերացնել օգտատիրոջը",
           variant: "destructive",
         });
       }
     }
   };
 
-const openUserBooks = async (readerId, type ) => {
-  try {
-    let data;
-    if (type === "RESERVED") {
-      data = await getReservedBooks(readerId);
-    } else if (type === "RETURNED") {
-      data = await getReturnedBook(readerId);
+  const openUserBooks = async (readerId, type) => {
+    try {
+      let data;
+      if (type === "RESERVED") {
+        data = await getReservedBooks(readerId);
+      } else if (type === "RETURNED") {
+        data = await getReturnedBook(readerId);
+      }
+
+      setSelectedReader(readers.find(r => r.id === readerId));
+      setReservations(Array.isArray(data) ? data : []);
+      setModalType(type);
+      setOpen(true);
+    } catch (e) {
+      console.error(e);
+      alert(e.message);
     }
-
-    setSelectedReader(readers.find(r => r.id === readerId));
-    setReservations(Array.isArray(data) ? data : []);
-    setModalType(type);
-    setOpen(true);
-  } catch (e) {
-    console.error(e);
-    alert(e.message);
-  }
-};
+  };
 
 
-const handleReturnBook = async (reservationId) => {
-  try {
-    await returnBook(reservationId);
+  const handleReturnBook = async (reservationId) => {
+    try {
+      await returnBook(reservationId);
 
-    setReservations(prev =>
-      prev.filter(r => r.reservationId !== reservationId)
-    );
+      setReservations(prev =>
+        prev.filter(r => r.reservationId !== reservationId)
+      );
 
-    setReaders(prev =>
-  prev.map(r =>
-    r.id === selectedReader.id
-      ? {
-          ...r,
-          reservedCount: r.reservedCount - 1,
-          returnedCount: r.returnedCount + 1,
-        }
-      : r
-  )
-);
-    await loadReaders(); 
-    toast({
-      title: "Գիրքը վերադարձված է",
-      description: "Գիրքը հաջողությամբ վերադարձվել է",
-    });
-  } catch (e) {
-    toast({
-      title: "Սխալ",
-      description: "Չհաջողվեց վերադարձնել գիրքը",
-      variant: "destructive",
-    });
-  }
-};
+      setReaders(prev =>
+        prev.map(r =>
+          r.id === selectedReader.id
+            ? {
+              ...r,
+              reservedCount: r.reservedCount - 1,
+              returnedCount: r.returnedCount + 1,
+            }
+            : r
+        )
+      );
+      await loadReaders();
+      toast({
+        title: "Գիրքը վերադարձված է",
+        description: "Գիրքը  վերադարձվել է",
+      });
+    } catch (e) {
+      toast({
+        title: "Սխալ",
+        description: "գիրքը չի վերադարձվել",
+        variant: "destructive",
+      });
+    }
+  };
 
-useEffect(() => {
-  console.log("Reservations:", reservations);
-}, [reservations]);
+  useEffect(() => {
+    console.log("Reservations:", reservations);
+  }, [reservations]);
 
   const resetForm = () => {
-   setEditingBook(null)
+    setEditingBook(null)
     setFormData({
       title: "",
       author: "",
@@ -392,12 +430,12 @@ useEffect(() => {
               <DialogTitle>{editingBook ? "Խմբագրել գիրքը" : "Ավելացնել գիրք"}</DialogTitle>
             </DialogHeader>
 
-         
+
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div>
                 <Label>Վերնագիր</Label>
                 <Input
-                  value={formData.title}  
+                  value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
                 />
@@ -425,7 +463,7 @@ useEffect(() => {
               <div>
                 <Label> URL</Label>
                 <Input
-                
+
                   value={formData.coverUrl}
                   onChange={(e) => setFormData({ ...formData, coverUrl: e.target.value })}
                 />
@@ -458,72 +496,72 @@ useEffect(() => {
               </div>
 
               <div className="flex items-center space-x-2 py-2">
-  <input
-    type="checkbox"
-    id="isAudioBook"
-    checked={formData.isAudioBook}
-    onChange={(e) => setFormData({ ...formData, isAudioBook: e.target.checked })}
-    className="w-4 h-4 mt-1"
-  />
-  <Label htmlFor="isAudioBook" className="cursor-pointer font-medium">
-    Սա աուդիոգիրք է
-  </Label>
-</div>
+                <input
+                  type="checkbox"
+                  id="isAudioBook"
+                  checked={formData.isAudioBook}
+                  onChange={(e) => setFormData({ ...formData, isAudioBook: e.target.checked })}
+                  className="w-4 h-4 mt-1"
+                />
+                <Label htmlFor="isAudioBook" className="cursor-pointer font-medium">
+                  Սա աուդիոգիրք է
+                </Label>
+              </div>
 
-{formData.isAudioBook && (
-  <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-dashed">
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Տևողություն</Label>
-        <Input
-          placeholder="օր. 5ժ 20ր"
-          value={formData.duration}
-          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Նարատոր (Կարդացող)</Label>
-        <Input
-          placeholder="Անուն Ազգանուն"
-          value={formData.narrator}
-          onChange={(e) => setFormData({ ...formData, narrator: e.target.value })}
-        />
-      </div>
-    </div>
-    <div>
-      <Label>Աուդիո ֆայլ (MP3)</Label>
-      <Input
-        type="file"
-        accept="audio/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            setFormData({ ...formData, audioFile: file });
-          }
-        }}
-      />
-    </div>
-  </div>
-)}
+              {formData.isAudioBook && (
+                <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-dashed">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Տևողություն</Label>
+                      <Input
+                        placeholder="օր. 5ժ 20ր"
+                        value={formData.duration}
+                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Նարատոր (Կարդացող)</Label>
+                      <Input
+                        placeholder="Անուն Ազգանուն"
+                        value={formData.narrator}
+                        onChange={(e) => setFormData({ ...formData, narrator: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Աուդիո ֆայլ (MP3)</Label>
+                    <Input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setFormData({ ...formData, audioFile: file });
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
-            
-                <div>
-        <Label>Գրքի ֆայլ (PDF, EPUB և այլն)</Label>
-        <Input
-          type="file"
-          accept=".pdf,.epub"
-          onChange={(e) => {
-            const file = e.target.files[0];
-            if (file) {
-              setFormData({
-                ...formData,
-                filePath: file, 
-                fileType: file.name.substring(file.name.lastIndexOf(".") + 1)
-              });
-            }
-          }}
-        />
-      </div>
+
+              <div>
+                <Label>Գրքի ֆայլ (PDF, EPUB և այլն)</Label>
+                <Input
+                  type="file"
+                  accept=".pdf,.epub"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setFormData({
+                        ...formData,
+                        filePath: file,
+                        fileType: file.name.substring(file.name.lastIndexOf(".") + 1)
+                      });
+                    }
+                  }}
+                />
+              </div>
 
 
               <div className="flex justify-end gap-4">
@@ -535,8 +573,8 @@ useEffect(() => {
         </Dialog>
       </div>
 
-    
-      
+
+
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -567,11 +605,11 @@ useEffect(() => {
         </CardHeader>
 
         <CardContent>
-          {filteredBooks.length === 0 ? (
+          {currentBooks.length === 0 ? (
             <p className="text-center text-muted-foreground py-6">Գրքեր չկան</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {filteredBooks.map((book) => (
+              {currentBooks.map((book) => (
                 <Card key={book.id} className="p-4">
                   <img
                     src={book.coverUrl}
@@ -601,129 +639,181 @@ useEffect(() => {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
-      <Card className="mt-10">
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <Users className="w-5 h-5" />
-      Օգտատերերի կառավարում
-    </CardTitle>
-  </CardHeader>
-
-  <CardContent>
-    {loadingReaders ? (
-      <p>Բեռնվում է...</p>
-    ) : readers.length === 0 ? (
-      <p className="text-muted-foreground">Օգտատերեր չկան</p>
-    ) : (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {readers.map((reader, index) => {
-        
-          const readerId = reader.id || reader.userId || reader._id || reader.user_id || reader.ID;
-          const uniqueKey = readerId || `${reader.email}-${index}` || `reader-${index}`;
-          return (
-            <Card key={uniqueKey} className="p-4">
-
-              <h3 className="font-semibold">
-                {reader.firstName} {reader.lastName}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                {reader.email}
-              </p>
-
-              <div className="flex flex-col gap-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Ամրագրված գրքեր:</span>
-                  <Badge variant="secondary" className="font-semibold bg-red-500 text-white hover:bg-red-400" onClick={() => {
-                  setSelectedReader(reader);
-                  openUserBooks(readerId, "RESERVED");
-  }} style={{ cursor: 'pointer' }}>
-                    {reader.reservedCount || reader.reservedBooksCount || reader.reservedBooks || 0}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Վերադարձված գրքեր:</span>
-                  <Badge variant="secondary" className="font-semibold bg-green-500 text-white hover:bg-green-600" onClick={() => {
-                    setSelectedReader(reader);
-                    openUserBooks(readerId, "RETURNED");
-                    
-                  }}
-                    style={{ cursor: 'pointer' }}>
-                    {reader.returnedCount || reader.returnedBooksCount || reader.returnedBooks || 0}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="flex justify-end mt-4">
+          {totalPages > 1 && (
+            <div className="flex justify-center m-10">
+              <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
-                  size="icon"
-                  onClick={() => handleDeleteReader(reader)}
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 >
-                  <Trash2 className="w-5 h-5 text-destructive" />
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+
+                {totalPages > 5 && (
+                  <>
+                    <span className="px-2 text-muted-foreground">...</span>
+                    <Button
+                      variant={currentPage === totalPages ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(totalPages)}
+                    >
+                      {totalPages}
+                    </Button>
+                  </>
+                )}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                >
+                  <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
-            </Card>
-          );
-        })}
-      </div>
-    )}
-  </CardContent>
-</Card>
-<Dialog open={open} onOpenChange={setOpen}>
-  <DialogContent className="ax-w-xl max-h-[80vh] overflow-y-auto">
-    <DialogHeader>
-      <DialogTitle>
-        {selectedReader?.firstName} {selectedReader?.lastName}—{" "}
-        {modalType === "RESERVED" ? "Ամրագրված գրքեր" : "Վերադարձված գրքեր"}
-      </DialogTitle>
-    </DialogHeader>
+            </div>
+          )}
+        </CardContent>
 
-      <DialogDescription>
-        Այստեղ ցուցադրված են տվյալ ընթերցողի գրքերը
-      </DialogDescription>
+      </Card>
+      <Card className="mt-10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Օգտատերերի կառավարում
+          </CardTitle>
+        </CardHeader>
 
-    {reservations.length === 0 ? (
-      <p className="text-muted-foreground">
-      {modalType === "RESERVED" ? "Ամրագրումներ չկան" : "Վերադարձված գրքեր չկան"}
-      </p>
-    ) : (
-      <div className="space-y-3">
-       {reservations.map((r) => (
-  <Card key={r.id} className="p-3 flex gap-4">
-    <img
-     
-  src={r.coverUrl}
-  alt={r.title}
-  className="w-զ0 h-28 object-cover rounded-md border"
-/>
+        <CardContent>
+          {loadingReaders ? (
+            <p>Բեռնվում է...</p>
+          ) : readers.length === 0 ? (
+            <p className="text-muted-foreground">Օգտատերեր չկան</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {readers.map((reader, index) => {
 
-    <div className="flex flex-col gap-1 flex-1">
-      <p className="font-semibold">{r.title}</p>
-      <p className="text-sm text-muted-foreground">Հեղինակ՝ {r.author}</p>
-      {console.log(r)}
-      <p className="text-sm">Ամրագրման օր՝ {r.reservationDate}</p>
-        {modalType === "RESERVED" ? (
-      <Badge className="w-fit bg-red-500 text-white">{r.status}</Badge>) :  <Badge className="w-fit bg-green-500 text-white">{r.status}</Badge>}
-   
+                const readerId = reader.id || reader.userId || reader._id || reader.user_id || reader.ID;
+                const uniqueKey = readerId || `${reader.email}-${index}` || `reader-${index}`;
+                return (
+                  <Card key={uniqueKey} className="p-4">
+
+                    <h3 className="font-semibold">
+                      {reader.firstName} {reader.lastName}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {reader.email}
+                    </p>
+
+                    <div className="flex flex-col gap-2 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Ամրագրված գրքեր:</span>
+                        <Badge variant="secondary" className="font-semibold bg-red-500 text-white hover:bg-red-400" onClick={() => {
+                          setSelectedReader(reader);
+                          openUserBooks(readerId, "RESERVED");
+                        }} style={{ cursor: 'pointer' }}>
+                          {reader.reservedCount || reader.reservedBooksCount || reader.reservedBooks || 0}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Վերադարձված գրքեր:</span>
+                        <Badge variant="secondary" className="font-semibold bg-green-500 text-white hover:bg-green-600" onClick={() => {
+                          setSelectedReader(reader);
+                          openUserBooks(readerId, "RETURNED");
+
+                        }}
+                          style={{ cursor: 'pointer' }}>
+                          {reader.returnedCount || reader.returnedBooksCount || reader.returnedBooks || 0}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDeleteReader(reader)}
+                      >
+                        <Trash2 className="w-5 h-5 text-destructive" />
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="ax-w-xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedReader?.firstName} {selectedReader?.lastName}—{" "}
+              {modalType === "RESERVED" ? "Ամրագրված գրքեր" : "Վերադարձված գրքեր"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <DialogDescription>
+            Այստեղ ցուցադրված են տվյալ ընթերցողի գրքերը
+          </DialogDescription>
+
+          {reservations.length === 0 ? (
+            <p className="text-muted-foreground">
+              {modalType === "RESERVED" ? "Ամրագրումներ չկան" : "Վերադարձված գրքեր չկան"}
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {reservations.map((r) => (
+                <Card key={r.id} className="p-3 flex gap-4">
+                  <img
+
+                    src={r.coverUrl}
+                    alt={r.title}
+                    className="w-զ0 h-28 object-cover rounded-md border"
+                  />
+
+                  <div className="flex flex-col gap-1 flex-1">
+                    <p className="font-semibold">{r.title}</p>
+                    <p className="text-sm text-muted-foreground">Հեղինակ՝ {r.author}</p>
+                    {console.log(r)}
+                    <p className="text-sm">Ամրագրման օր՝ {r.reservationDate}</p>
+                    {modalType === "RESERVED" ? (
+                      <Badge className="w-fit bg-red-500 text-white">{r.status}</Badge>) : <Badge className="w-fit bg-green-500 text-white">{r.status}</Badge>}
+
+                  </div>
+                  {modalType === "RESERVED" ? (
+                    <div className="flex flex-col justify-end">
+                      <Button
+                        className="w-30 flex items-center justify-center bg-green-500 hover:bg-green-600"
+                        onClick={() => handleReturnBook(r.id)}
+                      >
+                        Վերադարձված է
+                      </Button>
+                    </div>
+                  ) : null}
+                </Card>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
     </div>
-      {modalType === "RESERVED" ? (
-    <div className="flex flex-col justify-end">
-      <Button
-        className="w-30 flex items-center justify-center bg-green-500 hover:bg-green-600"
-        onClick={() => handleReturnBook(r.id)}
-      >
-        Վերադարձված է
-      </Button>
-    </div>
-      ) : null}
-  </Card>
-))}  
-      </div>
-    )}    
- </DialogContent>
-</Dialog>
-   </div>
   );
 }

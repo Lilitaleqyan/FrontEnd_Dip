@@ -133,7 +133,7 @@ export default function Books() {
     <div className="container mx-auto px-4 py-8 fade-in">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">Գրքերի կատալոգ</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Գրքերի ցուցակ</h1>
           <p className="text-muted-foreground">
             Գտեք ձեր սիրելի գիրքը մեր հավաքածուից ({filteredSortedBooks.length} արդյունք)
           </p>
