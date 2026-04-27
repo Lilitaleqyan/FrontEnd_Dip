@@ -5,7 +5,7 @@ const CURRENT_USER_KEY = "library_current_user";
 
 
 function decodeJwtPayload(token) {
-  try {
+  try {n
     const [, payloadBase64] = token.split(".");
     const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/");
     const json = atob(normalized);

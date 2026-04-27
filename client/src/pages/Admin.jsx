@@ -785,22 +785,23 @@ export default function Admin() {
 
                     src={r.coverUrl}
                     alt={r.title}
-                    className="w-զ0 h-28 object-cover rounded-md border"
+                    className="w-30 h-28 object-cover rounded-md border"
                   />
 
-                  <div className="flex flex-col gap-1 flex-1">
+                  <div className="flex flex-col gap-1  flex-1 ">
                     <p className="font-semibold">{r.title}</p>
                     <p className="text-sm text-muted-foreground">Հեղինակ՝ {r.author}</p>
-                    {console.log(r)}
-                    <p className="text-sm">Ամրագրման օր՝ {r.reservationDate}</p>
+                    <p className="text-sm ">Ամրագրման օր՝ {r.reservationDate}</p>
+                    <p className="text-sm">Վերադարձի օր՝ {r.returnedDate}</p>
                     {modalType === "RESERVED" ? (
                       <Badge className="w-fit bg-red-500 text-white">{r.status}</Badge>) : <Badge className="w-fit bg-green-500 text-white">{r.status}</Badge>}
 
                   </div>
+
                   {modalType === "RESERVED" ? (
-                    <div className="flex flex-col justify-end">
+                    <div className=" flex flex-col justify-end">
                       <Button
-                        className="w-30 flex items-center justify-center bg-green-500 hover:bg-green-600"
+                        className="w-25 flex items-center justify-center bg-green-500 hover:bg-green-600 "
                         onClick={() => handleReturnBook(r.id)}
                       >
                         Վերադարձված է

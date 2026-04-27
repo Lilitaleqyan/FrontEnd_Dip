@@ -76,12 +76,10 @@ export default function Books() {
 
   const categoryLabels = {
     all: "Բոլոր կատեգորիաները",
-    
     mathematics: "Մաթեմատիկա",
     physics: "Ֆիզիկա",
     chemistry: "Քիմիա",
     biology: "Կենսաբանություն",
-    astronomy: "Աստղագիտություն",
     informatics: "Ինֆորմատիկա",
     programming: "Ծրագրավորում",
     engineering: "Ճարտարագիտություն",
@@ -90,7 +88,6 @@ export default function Books() {
     psychology: "Հոգեբանություն",
     history: "Պատմություն",
     linguistics: "Լեզվաբանություն",
-    //"Գրականություն"
     economics: "Տնտեսագիտություն",
     law: "Իրավագիտություն",
     political_science: "Քաղաքագիտություն",
@@ -98,7 +95,6 @@ export default function Books() {
     psychology_of_war: "Ռազմական հոգեբանություն",
     geography: "Աշխարհագրություն",
     ecology: "Էկոլոգիա"
-
   };
 
   if (isLoading) return (

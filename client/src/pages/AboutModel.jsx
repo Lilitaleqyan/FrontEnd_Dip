@@ -100,10 +100,6 @@ export default function AboutModal() {
           </h2>
 
           <div className="space-y-6 text-slate-600 text-lg max-h-[300px] leading-relaxed max-w-2xl w-200 overflow-y-auto pr-4 custom-scrollbar space-y-6">
-            {/* <p className="text-slate-900">  
-              <span className="font-bold text-slate-900">«Գրքապտույտ»</span>֊ը միայն կայք չէ, այլև գիտական էկոհամակարգ է, որի առաքելությունն է տրամադրել մասնագիտական թվային գրականություն: Մենք ստեղծել ենք հարթակ, որտեղ գիտելիքը հասանելի է ընդամենը մեկ հպումով:
-            </p>
-             */}
             <p className="border-l-4  border-blue-500 pl-4 py-2 bg-slate-50 rounded-r-xl italic text-justify">
               <span className="font-bold text-slate-900 ">«Գրքապտույտ»</span>֊ը միայն կայք չէ, այլև գիտական էկոհամակարգ է, որի առաքելությունն է տրամադրել մասնագիտական թվային գրականություն:
               <p className="mt-3 ">Կայքում գործում են նաև լրացուցիչ ծառայություններ, որոնք հնարավորություն են տալիս օգտվողներին արագ գտնել անհրաժեշտ գրականությունը, կատարել
@@ -119,7 +115,6 @@ export default function AboutModal() {
 
         <div className="flex-1 bg-slate-50/50 flex items-center justify-center p-12 relative">
           <div className="relative scale-110">
-            {/* "Գրքի" թեթև իմիտացիա */}
             <div className="w-56 h-72 bg-white rounded-2xl shadow-[20px_20px_60px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col p-8 rotate-[-6deg] relative z-20">
               <div className="w-12 h-2 bg-blue-500 rounded-full mb-6"></div>
               <div className="space-y-4">
@@ -133,13 +128,11 @@ export default function AboutModal() {
               </div>
             </div>
 
-            {/* Երկրորդական դեկորատիվ շերտ */}
             <div className="absolute top-4 left-4 w-56 h-72 bg-blue-600 rounded-2xl shadow-xl rotate-[6deg] z-10 flex items-end p-6">
               <div className="text-white/20 text-6xl font-black italic">ԳՊ</div>
             </div>
           </div>
 
-          {/* Դեկորատիվ կետիկներ */}
           <div className="absolute top-10 right-10 grid grid-cols-3 gap-2 opacity-20">
             {[...Array(9)].map((_, i) => (
               <div key={i} className="w-2 h-2 bg-slate-400 rounded-full"></div>

@@ -76,7 +76,7 @@ export default function RegisterForm() {
             value={formData[name]}
             onChange={handleChange}
             placeholder={placeholder}
-            required={name !== "phone"}
+            //  required={name !== "phone" }
             className="w-full px-4 py-2 bg-gray-100 border border-transparent rounded-lg
              focus:outline-none focus:ring-2 focus:ring-blue-500 
              not-placeholder-shown:invalid:border-red-500 
@@ -91,13 +91,13 @@ export default function RegisterForm() {
 
       <div className="relative">
         <input
-          title="Գաղտնաբառը պետք է պարունակի առնվազն 8 նիշ (մեծատառ, թիվ և սիմվոլ(@$!%*?&․))"
-          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&․]{8,}$"
+          title="Գաղտնաբառը պետք է պարունակի առնվազն 8 նիշ (մեծատառ, թիվ և սիմվոլ(@$!%*?.&))"
+          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.]).{8,}$"
           type="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder=""
+
           required
           className="w-full px-4 py-2 bg-gray-100 border border-transparent rounded-lg
              focus:outline-none focus:ring-2 focus:ring-blue-500 
@@ -106,8 +106,8 @@ export default function RegisterForm() {
              peer"
         />
         <p className="mt-2 text-xs text-gray-500">
-          <span className="font-semibold text-blue-600">Պահանջ․</span> Գաղտնաբառը պետք է պարունակի առնվազն
-          <span className="font-bold text-gray-800"> 8 նիշ</span> (մեծատառ, սիմվոլ և թվեր):
+          <span className="font-semibold text-blue-600">Գաղտնաբառը պետք է պարունակի առնվազն
+            8 նիշ(մեծատառ, սիմվոլ և թվեր)</span>:
         </p>
       </div>
 
@@ -120,54 +120,5 @@ export default function RegisterForm() {
       </button>
     </form>
 
-    // <form onSubmit={handleSubmit} className="space-y-4 mt-6">
-
-    //   {[
-    //     { name: "firstName", placeholder: "Անուն" },
-    //     { name: "lastName", placeholder: "Ազգանուն" },
-    //     { name: "email", placeholder: "Email", type: "email", pattern: "^[^\s@]+@[^\s@]+\.[^\s@]+$" },
-    //     { name: "phone", placeholder: "Հեռախոս", type: "phone", pattern:"^(\\+374|0)?[1-9]{2}[0-9]{6}$"},
-    //     { name: "username", placeholder: "Օգտանուն" },
-    //     // {
-    //     //   // name: "password", placeholder: "Գաղտնաբառ", type: "password", pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
-    //     // }
-    //   ].map(({ name, placeholder, type = "text" }) => (
-
-    //     <input
-    //       key={name}
-    //       type={type}
-    //       name={name}
-    //       value={formData[name]}
-    //       onChange={handleChange}
-    //       placeholder={placeholder}
-    //       required={name !== "phone"}
-    //       className="w-full px-4 py-2 bg-gray-100 border rounded-lg
-    //                      focus:outline-none focus:ring-2 focus:ring-blue-500"
-    //     />
-    //   ))}
-    //   <div className="relative">
-    //     <input
-    //       pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
-    //       type={"password"}
-    //       name="password"
-    //       value={formData.password}
-    //       onChange={handleChange}
-    //       placeholder="Գաղտնաբառ"
-    //       required
-    //       className="w-full px-4 py-2 bg-gray-100 border rounded-lg"
-    //     />
-    //     <p class="mt-2 text-xs text-gray-500">
-    //       <span class="font-semibold text-blue-600">Պահանջ․</span> Գաղտնաբառը պետք է պարունակի առնվազն <span class="font-bold">8 նիշ</span> (մեծատառ, սիմվոլ և թվեր):
-    //     </p>
-    //   </div>
-
-    //   <button
-    //     type="submit"
-    //     className="w-full bg-blue-600 text-white py-2 rounded-lg
-    //                    hover:bg-blue-700 transition font-medium"
-    //   >
-    //     Գրանցվել
-    //   </button>
-    // </form>
   )
 }
