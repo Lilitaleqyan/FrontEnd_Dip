@@ -9,6 +9,7 @@ import {
   Volume2, Star, Headphones,
 } from "lucide-react";
 
+
 export default function Audiobooks() {
   const audioRef = useRef(new Audio());
   const [audiobooks, setAudiobooks] = useState([]);
@@ -17,15 +18,29 @@ export default function Audiobooks() {
   const [totalTime, setTotalTime] = useState("00:00:00");
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [lastAudioUrl, setLastAudioUrl] = useState(""); 
+  const [lastAudioUrl, setLastAudioUrl] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextAudio = () => {
+    const nextIndex = (currentIndex + 1) % audiobooks.length
+    setCurrentIndex(nextIndex);
+    setCurrentlyPlaying(audiobooks[nextIndex])
+    setIsPlaying(true)
+  }
+  const prevAudio = () => {
+    const prevIdx = (currentIndex - 1 + audiobooks.length) % audiobooks.length;
+    setCurrentIndex(prevIdx);
+    setCurrentlyPlaying(audiobooks[prevIdx]);
+    setIsPlaying(true);
+  }
 
   const rewind = () => {
-    audioRef.current.currentTime = Math.max(audioRef.current.currentTime - 15, 0);
+    audioRef.current.currentTime = Math.max(audioRef.current.currentTime - 30, 0);
   };
 
   const forward = () => {
     audioRef.current.currentTime = Math.min(
-      audioRef.current.currentTime + 15,
+      audioRef.current.currentTime + 30,
       audioRef.current.duration || 0
     );
   };
@@ -37,7 +52,7 @@ export default function Audiobooks() {
     const s = Math.floor(seconds % 60).toString().padStart(2, "0");
     return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
   }
- 
+
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -49,7 +64,7 @@ export default function Audiobooks() {
       if (audiobookList.length > 0 && !currentlyPlaying) {
         setCurrentlyPlaying(audiobookList[0]);
       }
-      
+
     };
     fetchBooks();
   }, []);
@@ -91,9 +106,12 @@ export default function Audiobooks() {
     const audio = audioRef.current;
 
     const updateProgress = () => {
-      setCurrentTime(formatTime(audio.currentTime));
-      setTotalTime(formatTime(audio.duration));
-      setProgress(audio.duration ? (audio.currentTime / audio.duration) * 100 : 0);
+      if (!isNaN(audio.duration)) {
+        setCurrentTime(formatTime(audio.currentTime));
+        setTotalTime(formatTime(audio.duration));
+        setProgress((audio.currentTime / audio.duration) * 100);
+      }
+
     };
 
     audio.addEventListener("timeupdate", updateProgress);
@@ -103,7 +121,7 @@ export default function Audiobooks() {
       audio.removeEventListener("timeupdate", updateProgress);
       audio.removeEventListener("loadedmetadata", updateProgress);
     };
-  }, []);
+  }, [currentlyPlaying]);
 
   const handlePlayPause = async () => {
     try {
@@ -120,6 +138,8 @@ export default function Audiobooks() {
   };
 
   const handleBookSelect = (book) => {
+    const index = audiobooks.findIndex(b => b.id === book.id);
+    setCurrentIndex(index !== -1 ? index : 0)
     setCurrentlyPlaying(book);
     setIsPlaying(true);
   };
@@ -132,21 +152,35 @@ export default function Audiobooks() {
       />
     ));
   };
+
+
+  const handleProgressClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const width = rect.width;
+    const percentage = x / width;
+
+    if (audioRef.current.duration) {
+      audioRef.current.currentTime = percentage * audioRef.current.duration;
+    }
+  };
   useEffect(() => {
-  const stopAudio = () => {
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-    audioRef.current.src = "";
-    setIsPlaying(false);
-    setCurrentlyPlaying(null);
-  };
+    const stopAudio = () => {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = "";
+      setIsPlaying(false);
+      setCurrentlyPlaying(null);
+    };
 
-  window.addEventListener("forceAudioStop", stopAudio);
+    window.addEventListener("forceAudioStop", stopAudio);
 
-  return () => {
-    window.removeEventListener("forceAudioStop", stopAudio);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("forceAudioStop", stopAudio);
+    };
+  }, []);
+
+
 
   return (
     <div className="container mx-auto px-4 py-8 fade-in">
@@ -181,14 +215,14 @@ export default function Audiobooks() {
           </div>
 
           <div>
-            <div className="w-full bg-white/20 rounded-full h-2 mb-4">
+            <div className="w-full bg-white/20 rounded-full h-2 mb-4" onClick={handleProgressClick}>
               <div
                 className="bg-white h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
             <div className="flex items-center justify-center space-x-8">
-              <Button variant="ghost" size="lg" onClick={rewind}>
+              <Button variant="ghost" size="lg" onClick={prevAudio}>
                 <SkipBack className="w-6 h-6" />
               </Button>
               <Button variant="ghost" size="lg" onClick={rewind}>
@@ -205,19 +239,11 @@ export default function Audiobooks() {
                 <RotateCw className="w-5 h-5" />
                 <span className="text-sm ml-1">30վ</span>
               </Button>
-              <Button variant="ghost" size="lg" onClick={forward}>
+              <Button variant="ghost" size="lg" onClick={nextAudio}>
                 <SkipForward className="w-6 h-6" />
               </Button>
             </div>
           </div>
-
-          {/* {currentlyPlaying?.audioUrl && (
-            <AudioPlayer
-              track={{
-                audioUrl: `http://localhost:8181/file${currentlyPlaying.audioUrl}`,
-              }}
-            />
-          )} */}
         </div>
       )}
 
@@ -253,7 +279,7 @@ export default function Audiobooks() {
                 {book.narrator && <p className="text-xs text-muted-foreground mb-3">Ընթերցում է․ {book.narrator}</p>}
                 <div className="flex items-center justify-between">
 
-                 <div className="flex gap-2">
+                  <div className="flex gap-2">
                     <Button
                       size="sm"
                       onClick={() => handleBookSelect(book)}
@@ -262,7 +288,7 @@ export default function Audiobooks() {
                       <Play className="w-3 h-3 mr-1" /> Լսել
                     </Button>
                     <Link href={`/book/${book.id}`}>
-                      <Button className = " ml-10" size="sm" variant="outline">
+                      <Button className=" ml-10" size="sm" variant="outline">
                         Մանրամասներ
                       </Button>
                     </Link>
